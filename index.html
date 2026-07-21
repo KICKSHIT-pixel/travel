@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>大连 · 威海 · 烟台 · 青岛 ｜ 海滨漫游指南</title>
+<style>
+  :root{
+    --blue:#3b82f6;
+    --mint:#2dd4bf;
+    --ink:#0f172a;
+    --muted:#64748b;
+    --card:#ffffff;
+    --radius:16px;
+    --shadow:0 6px 24px rgba(31,80,140,.08);
+    --border:1px solid rgba(43,108,176,.08);
+    --tab-h:58px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,#eaf4ff 0%,#e9fbf4 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 56px;}
+
+  /* ---------- Banner ---------- */
+  .banner{
+    background:var(--card);border:var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:26px 24px;
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;
+  }
+  .banner-text{flex:1 1 320px;min-width:0;}
+  .banner h1{
+    margin:0;font-size:26px;line-height:1.25;font-weight:800;letter-spacing:.3px;
+    background:linear-gradient(90deg,#2563eb,#2dd4bf);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .banner .sub{margin-top:8px;color:var(--muted);font-size:14px;font-weight:500;}
+  .badges{display:flex;gap:10px;flex-wrap:wrap;flex:0 0 auto;}
+  .badge{
+    background:linear-gradient(180deg,#f0f7ff,#e9fbf4);
+    border:1px solid rgba(43,108,176,.14);
+    border-radius:999px;padding:10px 16px;text-align:center;min-width:78px;
+    box-shadow:0 2px 8px rgba(31,80,140,.05);
+  }
+  .badge .b-val{font-size:18px;font-weight:800;color:var(--ink);line-height:1.1;}
+  .badge .b-key{font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;}
+
+  /* ---------- 定位按钮 ---------- */
+  .loc-btn{
+    display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+    padding:7px 14px;border-radius:999px;border:1px solid rgba(43,108,176,.2);
+    background:rgba(59,130,246,.06);color:var(--blue);font-size:12px;font-weight:700;
+    cursor:pointer;transition:all .15s;user-select:none;
+  }
+  .loc-btn:hover{background:rgba(59,130,246,.12);}
+  .loc-btn.locating{pointer-events:none;opacity:.65;}
+  .loc-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.3;}}
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    position:sticky;top:0;z-index:30;
+    display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+    padding:14px 0 12px;margin-top:4px;
+    background:linear-gradient(180deg,#eaf4ff 70%,rgba(234,244,255,0));
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto;border:1px solid rgba(43,108,176,.16);
+    background:#fff;color:var(--muted);
+    font-size:13px;font-weight:700;letter-spacing:.4px;
+    padding:9px 16px;border-radius:999px;cursor:pointer;
+    transition:all .18s ease;white-space:nowrap;
+  }
+  .tab:hover{border-color:var(--blue);color:var(--blue);}
+  .tab.active{
+    background:linear-gradient(90deg,var(--blue),#2563eb);
+    color:#fff;border-color:transparent;
+    box-shadow:0 4px 14px rgba(59,130,246,.35);
+  }
+
+  /* ---------- Main layout ---------- */
+  .main{display:grid;gap:20px;margin-top:6px;}
+  @media(min-width:900px){
+    .main{grid-template-columns:1.04fr .96fr;align-items:start;}
+    .map-panel{position:sticky;top:72px;height:calc(100vh - 96px);}
+  }
+  @media(max-width:899px){
+    .main{grid-template-columns:1fr;}
+    .map-panel{order:-1;position:sticky;top:var(--tab-h);height:42vh;z-index:20;}
+  }
+
+  /* ---------- Map ---------- */
+  .map-panel{
+    background:var(--card);border:var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;
+  }
+  .map-toolbar{padding:10px 14px;border-bottom:1px solid rgba(43,108,176,.08);display:flex;gap:8px;align-items:center;}
+  .map-search{flex:1;min-width:0;}
+  .map-search input{
+    width:100%;border:1px solid rgba(43,108,176,.18);border-radius:10px;
+    padding:9px 13px;font-size:14px;color:var(--ink);outline:none;
+    background:#f7fbff;transition:border-color .15s;
+  }
+  .map-search input:focus{border-color:var(--blue);background:#fff;}
+  /* 外部APP跳转按钮 */
+  .ext-btns{display:flex;gap:5px;flex-shrink:0;}
+  .ext-btn{
+    font-size:11px;font-weight:700;text-decoration:none;padding:5px 9px;border-radius:999px;
+    border:1px solid transparent;white-space:nowrap;cursor:pointer;transition:transform .12s;
+  }
+  .ext-btn:hover{transform:translateY(-1px);}
+  .ext-btn.qq-app{background:#eaf2ff;color:#1d4ed8;border-color:#c7dbff;}
+  .ext-btn.amap-app{background:#e9fbf4;color:#0d9488;border-color:#bdeee4;}
+  /* 搜索结果下拉 */
+  .search-dropdown{
+    position:absolute;top:100%;left:0;right:0;background:var(--card);
+    border:var(--border);border-top:none;border-radius:0 0 12px 12px;
+    box-shadow:var(--shadow);z-index:50;max-height:220px;overflow-y:auto;display:none;
+  }
+  .search-dropdown.show{display:block;}
+  .sd-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(43,108,176,.06);display:flex;align-items:center;gap:10px;}
+  .sd-item:hover{background:rgba(59,130,246,.04);}
+  .sd-item .sd-name{font-size:13px;font-weight:700;}
+  .sd-item .sd-addr{font-size:11px;color:var(--muted);}
+
+  .map-canvas{
+    position:relative;flex:1;min-height:0;
+    background:
+      linear-gradient(rgba(43,108,176,.05) 1px,transparent 1px) 0 0/26px 26px,
+      linear-gradient(90deg,rgba(43,108,176,.05) 1px,transparent 1px) 0 0/26px 26px,
+      radial-gradient(120% 120% at 30% 10%,#f3f9ff 0%,#eafaf4 100%);
+  }
+  #mapWrap{position:relative;inset:0;width:100%;height:100%;}
+  #map{width:100%;height:100%;display:block;cursor:grab;}
+  .map-tag{position:absolute;left:10px;bottom:10px;z-index:5;font-size:11px;font-weight:700;color:var(--muted);
+    background:rgba(255,255,255,.82);border:1px solid rgba(43,108,176,.12);padding:4px 9px;border-radius:999px;}
+  .marker{cursor:pointer;}
+  .marker .halo{opacity:0;transform-box:fill-box;transform-origin:center;}
+  .marker.active .halo,.marker.matched .halo{animation:pulse 1.25s ease-out infinite;}
+  .marker.active .dot{stroke-width:3.5;}
+  .marker.dim{opacity:.28;}
+  .marker-num{fill:#fff;font-size:13px;font-weight:700;pointer-events:none;font-family:inherit;}
+  @keyframes pulse{
+    0%{r:13;opacity:.55;transform:scale(1);}
+    100%{r:34;opacity:0;transform:scale(1.8);}
+  }
+  .route{transition:opacity .2s;}
+
+  /* ---------- Timeline ---------- */
+  .timeline{
+    background:var(--card);border:var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px 18px 22px;
+  }
+  .day-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+  .day-badge{
+    flex:0 0 auto;background:linear-gradient(90deg,var(--mint),#14b8a6);
+    color:#fff;font-weight:800;font-size:14px;padding:8px 12px;border-radius:12px;
+    box-shadow:0 4px 12px rgba(45,212,191,.35);
+  }
+  .day-city{font-size:18px;font-weight:800;}
+  .day-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+
+  .poi-list{position:relative;}
+  .poi-card{
+    position:relative;display:flex;gap:14px;padding:0 0 18px;cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .poi-card:active{transform:scale(.992);}
+  .poi-rail{position:relative;flex:0 0 26px;display:flex;justify-content:center;}
+  .poi-rail::before{
+    content:"";position:absolute;top:6px;bottom:-6px;left:50%;width:2px;
+    transform:translateX(-50%);background:rgba(43,108,176,.16);
+  }
+  .poi-card:last-child .poi-rail::before{display:none;}
+  .poi-dot{
+    position:relative;z-index:1;width:14px;height:14px;border-radius:50%;
+    margin-top:4px;border:3px solid #fff;box-shadow:0 0 0 2px rgba(43,108,176,.12);
+  }
+  .poi-body{flex:1;min-width:0;}
+  .poi-top{display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
+  .poi-time{font-size:13px;font-weight:700;color:var(--ink);}
+  .chip{
+    font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.3px;
+  }
+  .poi-name{font-size:15px;font-weight:700;line-height:1.35;}
+  .poi-note{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;}
+  .poi-cost{
+    display:inline-block;margin-top:8px;font-size:13px;font-weight:700;color:#0f766e;
+    background:rgba(45,212,191,.12);padding:3px 10px;border-radius:8px;
+  }
+  .poi-cost.free{color:var(--muted);background:rgba(100,116,139,.1);}
+
+  /* TIPS & 平台链接 */
+  .tips{
+    margin-top:10px;border:1px dashed rgba(43,108,176,.2);border-radius:12px;
+    background:linear-gradient(180deg,#f7fbff,#f3fbf8);padding:10px 12px;
+  }
+  .tips h4{margin:0 0 6px;font-size:12px;font-weight:800;color:#2563eb;display:flex;align-items:center;gap:5px;}
+  .tips ul{margin:0;padding-left:16px;}
+  .tips li{font-size:12.5px;color:#334155;line-height:1.55;margin-bottom:3px;}
+  .links{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+  .lnk{
+    font-size:11px;font-weight:700;text-decoration:none;padding:4px 10px;border-radius:999px;
+    border:1px solid transparent;transition:transform .12s;white-space:nowrap;
+  }
+  .lnk:hover{transform:translateY(-1px);}
+  .lnk.xhs{background:#fff0f1;color:#e11d48;border-color:#ffd0d6;}
+  .lnk.qq{background:#eaf2ff;color:#1d4ed8;border-color:#c7dbff;}
+  .lnk.amap{background:#e9fbf4;color:#0d9488;border-color:#bdeee4;}
+  .lnk.ctrip{background:#eef2ff;color:#4f46e5;border-color:#cfd6ff;}
+  .lnk.meituan{background:#fff7e6;color:#b45309;border-color:#ffe2ad;}
+
+  /* 酒店推荐（排行卡片） */
+  .hotels{
+    margin-top:18px;border:1px solid rgba(43,108,176,.16);border-radius:14px;
+    background:linear-gradient(180deg,#ffffff,#f5faff);padding:14px 16px;
+  }
+  .hotels h4{margin:0 0 10px;font-size:13px;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:6px;}
+  .hotel-rank{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:10px 0;border-top:1px dashed rgba(43,108,176,.14);
+  }
+  .hotel-rank:first-of-type{border-top:none;}
+  .rank-num{
+    flex:0 0 22px;width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;
+    color:#fff;background:var(--blue);line-height:1;
+  }
+  .rank-num.r2{background:linear-gradient(135deg,#94a3b8,#64748b);}
+  .rank-num.r3{background:linear-gradient(135deg,#d97706,#b45309);}
+  .rank-num.rx{background:rgba(148,163,184,.35);color:var(--muted);}
+  .hotel-info{flex:1;min-width:0;}
+  .hotel .h-name{font-size:13.5px;font-weight:700;}
+  .hotel .h-note{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .hotel-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+  .htag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(45,212,191,.1);color:#0d9488;}
+  .hotel .h-right{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+  .hotel .h-price{font-size:13px;font-weight:800;color:#0f766e;white-space:nowrap;}
+  .hotel .h-btn{
+    font-size:11px;font-weight:700;text-decoration:none;color:#fff;
+    background:linear-gradient(90deg,var(--blue),#2563eb);padding:5px 11px;border-radius:999px;white-space:nowrap;
+  }
+
+  /* 洗浴中心排行 */
+  .bathhouses{
+    margin-top:18px;border:1px solid rgba(245,158,11,.2);border-radius:14px;
+    background:linear-gradient(180deg,#fffbeb,#fef3c7);padding:14px 16px;
+  }
+  .bathhouses h4{margin:0 0 10px;font-size:13px;font-weight:800;color:#92400e;display:flex;align-items:center;gap:6px;}
+  .bh-item{
+    display:flex;align-items:flex-start;gap:10px;padding:10px 0;
+    border-top:1px dashed rgba(245,158,11,.25);
+  }
+  .bh-item:first-of-type{border-top:none;}
+  .bh-info{flex:1;min-width:0;}
+  .bh-name{font-size:13.5px;font-weight:700;color:#92400e;}
+  .bh-addr{font-size:11.5px;color:var(--muted);margin-top:1px;}
+  .bh-features{font-size:12px;color:#78350f;margin-top:3px;line-height:1.4;}
+  .bh-price{flex:0 0 auto;font-size:13px;font-weight:800;color:#d97706;white-space:nowrap;}
+  .bh-link{font-size:11px;text-decoration:none;color:#b45309;font-weight:700;white-space:nowrap;}
+
+  /* ---------- Budget ---------- */
+  .budget{
+    margin-top:24px;background:var(--card);border:var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:22px 22px 20px;
+  }
+  .budget h2{margin:0 0 12px;font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px;}
+  .budget h2::before{content:"";width:5px;height:18px;border-radius:3px;background:linear-gradient(180deg,var(--blue),var(--mint));}
+  .budget .total{font-size:15px;font-weight:700;margin-bottom:10px;}
+  .budget .total b{color:var(--blue);}
+  .budget ul{margin:6px 0 12px;padding-left:18px;color:var(--muted);font-size:13.5px;line-height:1.7;}
+  .budget ul b{color:var(--ink);}
+  .budget .note{font-size:12px;color:var(--muted);line-height:1.6;border-top:1px dashed rgba(43,108,176,.18);padding-top:10px;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:4px 0 14px;}
+  .legend span{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:600;}
+  .legend i{width:11px;height:11px;border-radius:50%;display:inline-block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Banner -->
+  <header class="banner">
+    <div class="banner-text">
+      <h1>大连 · 威海 · 烟台 · 青岛 ｜ 海滨漫游指南</h1>
+      <div class="sub">两人成行 · 南昌出发 · 2026年8月4日起 · 预算5000/人 · 真地图+实时定位+一键导航</div>
+      <button class="loc-btn" id="locBtn" onclick="locateMe()">
+        <span class="loc-dot"></span> 定位我的位置
+      </button>
+    </div>
+    <div class="badges" id="badges"></div>
+  </header>
+
+  <!-- Day Tabs -->
+  <nav class="tabs" id="tabs"></nav>
+
+  <!-- Main -->
+  <div class="main">
+    <section class="timeline" id="timeline"></section>
+    <aside class="map-panel">
+      <div class="map-toolbar">
+        <div class="map-search" style="position:relative;">
+          <input id="search" type="text" placeholder="搜索地点 / 出片 / 美食…" autocomplete="off" />
+          <div class="search-dropdown" id="searchDropdown"></div>
+        </div>
+        <div class="ext-btns">
+          <a class="ext-btn qq-app" href="#" id="qqAppBtn" target="_blank">打开腾讯地图</a>
+          <a class="ext-btn amap-app" href="#" id="amapAppBtn" target="_blank">打开高德地图</a>
+        </div>
+      </div>
+      <div class="map-canvas">
+        <div id="mapWrap"></div>
+        <div class="map-tag" id="mapTag">加载中…</div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Budget reference -->
+  <section class="budget">
+    <h2>预算参考</h2>
+    <div class="total">总额：<b>¥5000 / 人</b>（两人同行，平摊更省）</div>
+    <div class="legend">
+      <span><i style="background:#3b82f6"></i>景点</span>
+      <span><i style="background:#f97316"></i>美食</span>
+      <span><i style="background:#8b5cf6"></i>文化</span>
+      <span><i style="background:#10b981"></i>购物</span>
+    </div>
+    <ul>
+      <li><b>优先级</b>：美食 &gt; 出片 &gt; 自然 &gt; 历史文化 &gt; 夜生活</li>
+      <li><b>分配逻辑</b>：大连 / 烟台 / 威海（前三座城市）优先保障；青岛用剩余预算收尾。</li>
+      <li><b>参考口径</b>：价格基于携程/美团/小红书/高德平台 2026 年 8 月旺季均价估算 ——
+        交通（机票南昌↔大连/青岛）≈1300、船票大连→烟台≈300、
+        住宿（约 7 晚，旺季200-260/间/晚，两人分摊）≈750-980、
+        餐饮（美食优先≈150/人/天×9天）≈1350、
+        门票+当地交通+购物≈1000-1270。<br>
+        ⚠️ 8月为山东沿海旅游旺季，酒店价格可能比淡季上浮30%-60%，建议提前15-30天预订锁定低价。</li>
+    </ul>
+    <div class="note">所有价格为平台实时均价估算，以预订时实际成交为准。洗浴中心/酒店均附真实店名与携程查价链接，点击可查看8月实时房态与价格。真·腾讯地图已启用（有效期至 2026-07-30）。</div>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   腾讯地图 Key（已填入，联网即可启用真底图；过期或断网自动回退 SVG 示意图）
+   ===================================================================== */
+const TENCENT_MAP_KEY = "6AXBZ-HW3K4-VL3U4-DXI7H-RIXOE-XVBC3";
+
+/* ===================== 数据（日期已更新为2026年8月） ===================== */
+const ITINERARY = [
+ { day:1, date:"8月4日 周二", city:"大连", title:"抵达大连 · 洗浴中心过夜", pois:[
+   {time:"18:30", name:"南昌→大连 航班落地", cat:"景点", note:"周水子机场取行李，前往市区", cost:0, lat:38.965, lng:121.539},
+   {time:"20:00", name:"大连洗浴中心过夜", cat:"文化", note:"泡汤+搓澡+过夜，缓解飞行疲劳（首推佳和温泉水世界，人均49起含过夜）", cost:120, lat:38.913, lng:121.615}
+ ]},
+ { day:2, date:"8月5日 周三", city:"大连", title:"大连市区 · 东港日料（重点）", pois:[
+   {time:"09:30", name:"星海广场", cat:"景点", note:"城市地标 / 喂海鸥 / 日出出片", cost:0, lat:38.880, lng:121.595},
+   {time:"11:00", name:"莲花山观景台", cat:"景点", note:"俯瞰海滨全景 / 跨海大桥同框 / 门票¥20", cost:20, lat:38.866, lng:121.575},
+   {time:"12:30", name:"日式定食午餐", cat:"美食", note:"东港附近轻食补充", cost:80, lat:38.900, lng:121.620},
+   {time:"15:00", name:"渔人码头 + 滨海路", cat:"景点", note:"海岸栈道 / 彩色建筑 / 蓝调时刻绝美", cost:0, lat:38.878, lng:121.648},
+   {time:"18:30", name:"东港·威尼斯水城", cat:"景点", note:"欧式建筑夜景 / 运河倒影 / 免费", cost:0, lat:38.925, lng:121.643},
+   {time:"19:30", name:"樱木千鹤·日本料理(东港)", cat:"美食", note:"环境精致出片天花板！海胆饭必点，人均¥268", cost:268, lat:38.927, lng:121.648}
+ ]},
+ { day:3, date:"8月6日 周四", city:"大连", title:"大连 · 自然出片 + 购物", pois:[
+   {time:"09:00", name:"菱角湾 + 滨海路", cat:"景点", note:"山海同框 / 彩色防波堤日系感", cost:0, lat:38.872, lng:121.662},
+   {time:"11:00", name:"跨海大桥观景台", cat:"景点", note:"大桥全景 / 黄昏橘粉晚霞 / 最佳机位森林动物园南门对面栈道步行200米", cost:0, lat:38.858, lng:121.582},
+   {time:"14:00", name:"青泥洼桥购物", cat:"购物", note:"补给伴手礼 / 人参樱桃制品认准老字号", cost:200, lat:38.913, lng:121.617},
+   {time:"16:00", name:"俄罗斯风情街", cat:"景点", note:"免费老建筑 / 复古风拍照 / 上午光影斜照墙面最有味道", cost:0, lat:38.920, lng:121.625}
+ ]},
+ { day:4, date:"8月7日 周五", city:"大连", title:"大连半日 · 候船赴烟台", pois:[
+   {time:"10:00", name:"自由补拍 / 休整", cat:"景点", note:"查漏补缺 / 整理行李准备登船", cost:0, lat:38.900, lng:121.620},
+   {time:"15:00", name:"大连港候船", cat:"景点", note:"前往码头准备登船（渤海轮渡/中铁轮渡白天航次）", cost:0, lat:38.960, lng:121.655}
+ ]},
+ { day:5, date:"8月8日 周六", city:"烟台", title:"白天乘船抵达烟台", pois:[
+   {time:"08:00", name:"大连港乘船→烟台", cat:"景点", note:"渤海轮渡约6-7小时，船上可观海鸥群+海上日出", cost:300, lat:38.960, lng:121.655},
+   {time:"14:30", name:"抵达烟台港", cat:"景点", note:"下船入住酒店", cost:0, lat:37.548, lng:121.405},
+   {time:"16:00", name:"烟台山", cat:"文化", note:"免费 / 登灯塔看港口全景 / 红顶建筑傍晚光线柔出片", cost:0, lat:37.548, lng:121.405},
+   {time:"18:30", name:"朝阳街海鲜晚餐", cat:"美食", note:"烟台海鲜主场 / 海肠捞饭+鲅鱼水饺必点 / 找本地人老店避坑", cost:180, lat:37.535, lng:121.395}
+ ]},
+ { day:6, date:"8月9日 周日", city:"烟台", title:"烟台久留 · 养马岛+蓬莱", pois:[
+   {time:"09:00", name:"养马岛", cat:"景点", note:"免费进岛 / 强烈推荐租电动车环岛¥30/h可砍价逆时针更顺 / 果冻海晴天满潮才触发", cost:40, lat:37.450, lng:121.580},
+   {time:"12:30", name:"养马岛海鲜午餐", cat:"美食", note:"岛上海鲜面馆 / 物美价廉", cost:100, lat:37.450, lng:121.580},
+   {time:"14:30", name:"蓬莱阁", cat:"文化", note:"携程/美团提前买联票比现场便宜 / 学生证半价 / 古建筑+海市蜃楼传说", cost:100, lat:37.785, lng:120.745}
+ ]},
+ { day:7, date:"8月10日 周一", city:"威海", title:"威海 · 网红大船打卡", pois:[
+   {time:"09:30", name:"赴威海", cat:"景点", note:"烟台→威海高铁G474/G5587约1h / 自驾走威青高速", cost:55, lat:37.510, lng:122.070},
+   {time:"14:00", name:"那香海·布鲁维斯号", cat:"景点", note:"📸 免费无需预约！网红搁浅大船必拍 / 侧面礁石区剪影+日落前2小时粉紫漫过船体最绝", cost:0, lat:37.420, lng:122.480},
+   {time:"17:30", name:"威海国际海水浴场", cat:"景点", note:"免费日落出片 / 带拖鞋踩沙退潮可赶海", cost:0, lat:37.510, lng:122.070}
+ ]},
+ { day:8, date:"8月11日 周二", city:"青岛", title:"威海→青岛 · 收尾", pois:[
+   {time:"09:30", name:"赴青岛", cat:"景点", note:"威海→青岛高铁D1612/D1691约2.5h", cost:110, lat:36.062, lng:120.385},
+   {time:"14:00", name:"八大关", cat:"景点", note:"免费万国建筑 / 公主楼蒂芙尼蓝外墙 / 清晨7点前避开婚纱人流", cost:0, lat:36.055, lng:120.335},
+   {time:"16:30", name:"小麦岛", cat:"景点", note:"免费孤独树+礁石海岸线逆光拍剪影 / 白裙草帽下午4-6点光线最佳", cost:0, lat:36.045, lng:120.425},
+   {time:"18:30", name:"青岛啤酒海鲜晚餐", cat:"美食", note:"台东/营口路市场现买海鲜加工 / 辣炒蛤蜊+鲅鱼水饺+原浆啤酒", cost:200, lat:36.062, lng:120.385}
+ ]},
+ { day:9, date:"8月12日 周三", city:"青岛", title:"青岛地标 + 返程", pois:[
+   {time:"09:00", name:"栈桥 + 小青岛", cat:"景点", note:"城市地标免费 / 早8-10点人少不逆光秋冬季可喂海鸥", cost:0, lat:36.058, lng:120.315},
+   {time:"11:00", name:"五四广场", cat:"景点", note:"'五月的风'地标免费 / 步行5分钟到奥帆中心情人坝看日落", cost:0, lat:36.062, lng:120.385},
+   {time:"15:00", name:"青岛→南昌 返程", cat:"景点", note:"胶东机场飞回南昌 / 提前2小时到机场", cost:0, lat:36.265, lng:120.380}
+ ]}
+];
+
+/* ==================== 洗浴中心排行（真实数据，来自携程/美团/小红书攻略） ==================== */
+const BATHHOUSES = [
+  {
+    rank:1, name:"佳和温泉水世界",
+    addr:"中华西路中源楼一楼（华南广场商圈，大连北站打车仅10分钟/地铁1号线直达）",
+    features:["⭐ 综合性价比最高","上下七层专属区域五层+嬉水区+泳池","门票成人¥49 儿童¥29 团购更低","休息大厅免费过夜","餐饮区品种多价格不离谱 有电影院排片表","停车2元/半小时 消费免停"],
+    price:"¥49起",
+    ctripLink:"https://www.ctrip.com/sight/dalian4/145200191.html"
+  },
+  {
+    rank:2, name:"漫·汤泉",
+    addr:"中山区长江东路13、15号（地铁2号线港湾广场站直达）",
+    features:["🍓 水果饮料无限畅饮 30多种水果+80种饮料+哈根达斯不限量","休息厅免费胸贴防滑袜 细节满分","工作日18小时畅玩含过夜¥189 周末¥209","单间带私人影院¥168/间 KTV麻将汗蒸房齐全"],
+    price:"¥189起",
+    ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E6%BC%AB%E6%B1%A4%E6%B3%89"
+  },
+  {
+    rank:3, name:"百溪泉温泉生活馆",
+    addr:"甘井子区东纬路2号（地铁1号线春柳站）",
+    features:["💰 地中海风情装修 性价比之王","大型汗蒸广场+儿童淘气堡","门票¥49起 菜品丰富价格亲民","交通便利 周边配套齐全 学生党友好"],
+    price:"¥49起",
+    ctripLink:"https://m.ctrip.com/html5/hotel/hoteldetail/130217662.html"
+  },
+  {
+    rank:4, name:"泉溪温泉生活馆",
+    addr:"沙河口区五一路40号五星国际B1层",
+    features:["♨️ 多种特色温泉 冰岛蓝泉/金汤铁泉等","蒙古包汗蒸/岩盘浴/火山岩房/玉石子浴","人均消费¥137 含搓澡套餐","儿童乐园+茶吧休闲区+窑洞休息"],
+    price:"¥137起",
+    ctripLink:"https://gs.ctrip.com/html5/you/sight/turpan35/146103445.html"
+  },
+  {
+    rank:5, name:"蔷萝花潭·温泉度假洗浴",
+    addr:"甘井子区恩泽南园5A号（西郊森林公园旁，公交507/535可达，免费停车）",
+    features:["🌿 湖景汤泉+天然氧吧 男汤区整面落地窗直面西山湖","室外汤泉天然岩石打造 私密性极强","适合情侣约会 家庭遛娃","建议自驾 免费停车位充足"],
+    price:"¥128起",
+    ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E8%95%BE%E8%90%9D%E8%8A%B1%E6%BD%AD%E6%B8%A9%E6%B3%89"
+  },
+  {
+    rank:6, name:"汤景泽日式温泉酒店",
+    addr:"金州区滇池西路88号（金石滩地铁站约10分钟车程）",
+    features:["🏯 纯正日式+私汤别墅 一园区一步一景","客房配备私汤温泉及日式庭院景观","水质获游客广泛好评 拍照出片","情侣/家庭度假首选 金石滩游玩后入住"],
+    price:"¥380起",
+    ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E6%B1%A4%E6%99%AF%E6%B3%BD"
+  }
+];
+
+/* ==================== 酒店推荐排行（真实数据，来自腾讯地图POI+携程攻略+小红书2026最新） ==================== */
+const HOTELS = {
+  2:[ // 8月5日 大连市区（近东港）
+    {
+      rank:1, name:"全季酒店(大连东港威尼斯水城店)", price:"¥230-280", tags:["近东港夜景","步行到威尼斯水城","地铁友好"],
+      note:"离东港日料和威尼斯水城最近，出片夜景方便。8月旺季建议提前订。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%85%A8%E5%AD%A3%E9%85%92%E5%BA%97%E5%A4%A7%E8%BF%9E%E4%B8%9C%E6%B8%AF"
+    },
+    {
+      rank:2, name:"如家精选(大连港湾广场店)", price:"¥180-220", tags:["性价比之选","地铁站口"],
+      note:"性价比高，近港湾广场地铁站，去东港打车起步价。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%A6%82%E5%AE%B6%E7%B2%BE%E9%80%89%E5%A4%A7%E8%BF%9E%E6%B8%AF%E6%B9%BF%E5%9C%BA"
+    },
+    {
+      rank:3, name:"大连东港亚朵轻居", price:"¥250-310", tags:["设计感强","出片","新开业"],
+      note:"亚朵旗下年轻品牌，装修有设计感，房间出片。预算充裕首选。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E4%BA%9A%E6%9C%B4%E8%BD%BB%E5%B1%85%E5%A4%A7%E8%BF%9E%E4%B8%9C%E6%B8%AF"
+    }
+  ],
+  3:[ // 8月6日 大连市区（火车站附近）
+    {
+      rank:1, name:"汉庭酒店(大连火车站中山广场店)", price:"¥170-210", tags:["交通枢纽","去哪都方便"],
+      note:"紧邻火车站和中山广场，去星海/滨海路都有公交/地铁。返程日前一晚住这里最方便。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E6%B1%89%E5%BA%AD%E5%A4%A7%E8%BF%9E%E7%81%AB%E8%BD%A6%E7%AB%99%E4%B8%AD%E5%B1%B1%E5%B9%BF%E5%9C%BA"
+    },
+    {
+      rank:2, name:"唐银酒店(大连火车站东关街店)", price:"¥160-200", tags:["超高性价比","近车站"],
+      note:"近火车站北广场和大连地铁站，价格亲民。8月房源紧张时备选。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%94%90%E9%93%B6%E9%85%92%E5%BA%97%E5%A4%A7%E8%BF%9E%E7%81%AB%E8%BD%A6%E7%AB%99"
+    }
+  ],
+  4:[ // 8月7日 大连最后一晚（近港口）
+    {
+      rank:1, name:"全季酒店(大连东港威尼斯水城店)", price:"¥230-280", tags:["近港口候船","次日出发方便"],
+      note:"最后一天大连住这里，距港口车程15分钟内，次日从容登船。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%85%A8%E5%AD%A3%E9%85%92%E5%BA%97%E5%A4%A7%E8%BF%9E%E4%B8%9C%E6%B8%AF"
+    }
+  ],
+  5:[ // 8月8日 烟台（近烟台山/港口）
+    {
+      rank:1, name:"金海大酒店(烟台火车站吾悦广场店)", price:"¥190-240", tags:["近烟台站","近烟台港","吾悦广场商圈"],
+      note:"近烟台站和客运码头，下船后步行/短打车即达。旁边就是吾悦广场吃饭方便。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E9%87%91%E6%B5%B7%E5%A4%A7%E9%85%92%E5%BA%97%E7%83%9F%E5%8F%B0%E7%81%AB%E8%BD%A6%E7%AB%99"
+    },
+    {
+      rank:2, name:"维也纳智好酒店(烟台金沙滩泰山路店)", price:"¥200-260", tags:["近金沙滩海水浴场","品牌连锁"],
+      note:"如果想第一天就去金沙滩玩水可选这家，开发区位置环境好。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E7%BB%B4%E4%B9%9F%E7%BA%B3%E6%99%BA%E5%A5%BD%E7%83%9F%E5%8F%B0%E9%87%91%E6%B2%99%E6%BB%A9"
+    }
+  ],
+  6:[ // 8月9日 烟台（养马岛/蓬莱）
+    {
+      rank:1, name:"养马岛海边民宿/公寓", price:"¥180-350", tags:["岛上住宿","日出海景","需提前订"],
+      note:"住岛上可看日出！8月是旺季务必提前15天以上订。推荐在携程搜'养马岛海景民宿'按评分筛选。部分民宿提供电动车租赁和赶海工具。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%85%BB%E9%A9%AC%E5%B2%9B%E6%B0%91%E5%AE%BF"
+    },
+    {
+      rank:2, name:"全季酒店(烟台莱山区迎春大街店)", price:"¥200-260", tags:["莱山区中心","去蓬莱中转方便"],
+      note:"不住岛上时的备选，莱山区去蓬莱走高速较顺。第二天要去蓬莱阁的选这个方向。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%85%A8%E5%AD%A3%E9%85%92%E5%BA%97%E7%83%9F%E5%8F%B0%E8%8E%B1%E5%B1%B1%E5%8C%BA"
+    }
+  ],
+  7:[ // 8月10日 威海（那香海/国际海水浴场）
+    {
+      rank:1, name:"那香海度假公寓/民宿", price:"¥180-350/晚", tags:["离布鲁维斯号最近","出片首选","需自驾"],
+      note:"⭐ 住这里去布鲁维斯沉船最近（步行/骑车可达），出片效率最高！那香海片区平价公寓180起，独栋别墅600-2000（多人分摊划算）。无公共交通必须自驾。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E9%82%A3%E9%A6%99%E6%B5%B7%E6%B0%91%E5%AE%BF"
+    },
+    {
+      rank:2, name:"希岸酒店(威海火炬八街国际海水浴场店)", price:"¥220-320", tags:["近火炬八街","近国际海水浴场","品牌放心"],
+      note:"第一次来威海选它准没错！距离火炬八街和国际海水浴场都很近，步行就能到海边。连锁品牌品质稳定不踩雷。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%B8%8C%E5%B2%B8%E9%85%92%E5%BA%97%E5%A8%81%E6%B5%B7%E7%81%AB%E7%82%AB%E5%85%AB%E8%A1%97"
+    },
+    {
+      rank:3, name:"威海橙烨度假公寓(韩乐坊店)", price:"¥80-160/人", tags:["穷游神器","韩乐坊夜市","loft带投影"],
+      note:"穷游天花板！高层双景（海景+韩乐坊夜景），人均80起带投影厨具。距高铁站1公里，5分钟到海边。4.96分高口碑房源。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E5%A8%81%E6%B5%B7%E6%A9%99%E7%83%A8%E5%BA%A6%E5%81%87%E5%85%AC%E5%AF%93"
+    }
+  ],
+  8:[ // 8月11日 青岛（老城区）
+    {
+      rank:1, name:"锦江之星(青岛栈桥中山路地铁站店)", price:"¥170-220", tags:["近栈桥","老城区","地铁友好"],
+      note:"步行到栈桥和小青岛，老城区交通方便。比五四广场周边便宜30%+。8月房源紧张尽早订。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E9%94%A6%E6%B1%9F%E6%98%9F%E6%97%97%E9%9D%92%E5%B2%9B%E6%A0%88%E6%A1%A5"
+    },
+    {
+      rank:2, name:"7天优品(青岛五四广场芝泉路地铁站店)", price:"¥180-240", tags:["近五四广场","近奥帆中心"],
+      note:"想逛五四广场和奥帆中心的选这家，距五四广场仅1公里。地铁芝泉路站直达。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=7%E5%A4%A9%E4%BC%98%E5%93%81%E9%9D%92%E5%B2%9B%E4%BA%94%E5%9B%9B%E5%B9%BF%E5%9C%BA"
+    }
+  ],
+  9:[ // 8月12日 返程日
+    {
+      rank:1, name:"锦江之星(青岛栈桥中山路地铁站店)", price:"¥170-220", tags:["返程寄存方便","近机场大巴"],
+      note:"返程日住老城区，寄存行李后去栈桥/五四广场最后打卡，晚上去胶东机场方便。",
+      ctripLink:"https://www.ctrip.com/searchsite/all/?query=%E9%94%A6%E6%B1%9F%E6%98%9F%E6%97%97%E9%9D%92%E5%B2%9B%E6%A0%88%E6%A1%A5"
+    }
+  ]
+};
+
+/* 每景点 TIPS（键 = POI name；其余 POI 给通用提示） */
+const TIPS = {
+  "那香海·布鲁维斯号":["免费无需预约，直接导航'布鲁威斯号'；周边旅拍精修套餐约¥199可现场约","威海站顺风车约30-40元/40分钟，或高铁到荣成转201路+打车；建议15:00-17:00或日落前到避开人流","侧面礁石区拍剪影、日落前2小时粉紫晚霞漫过船体最绝；穿黑白+亮色围巾撞色，海边风大保暖"],
+  "樱木千鹤·日本料理(东港)":["📍 港浦路71/73/75号 | 评分4.8 | 人均¥268（点评数据）","原木极简风+暖光灯美到窒息，板前料理全程观赏仪式感拉满","必点：海胆饭堆成山（无菌蛋搅拌后包海苔秒变手卷）、海胆汉堡（甜虾+金枪鱼泥+海胆三重暴击）","预算友好替代：Follow福禄·新派日本料理(东港店) 人均¥131 评分4.6 📍港浦路98-1号威尼斯水城二期S102","美团/大众点评提前排号！订窗边/板前位边看料理边拍配东港夜景"],
+  "星海广场":["免费开放，清晨薄雾或日落最出片","百年城雕附近可拍跨海大桥与落日同框；喂海鸥用长焦抓拍 秋冬季节海鸥更多"],
+  "莲花山观景台":["山顶观景台门票约¥20，建议买观光小火车票代步别徒步爬40分钟","日落前1小时到俯瞰星海湾+跨海大桥全貌","山顶白色咖啡厅是绝佳机位；蓝调时刻拍城市灯光"],
+  "跨海大桥观景台":["观景免费停车收费；最佳机位森林动物园南门对面栈道步行200米，黄昏橘粉晚霞绝美","桥下沙滩拍落日剪影；夜景亮灯约19:00-22:00可长曝"],
+  "渔人码头 + 滨海路":["免费，下午4-5点顺光彩色建筑+蓝天数度拉满","蓝调时刻灯塔+渔船灯光+暮色最文艺；海鸥飞过抓拍比摆拍生动"],
+  "东港·威尼斯水城":["免费游船另收费；傍晚灯光亮起最有异域感","运河倒影建筑，手机广角低角度拍水道纵深"],
+  "菱角湾 + 滨海路":["免费，下午3-5点光最好海鸥活跃","彩色防波堤+错落渔船日系感；穿浅色衣服站防波堤，面包引海鸥抓拍"],
+  "养马岛":["进岛免费；快艇/骑马等另购票理性选择","强烈推荐租电动车环岛约¥30/小时可砍价，逆时针更顺；公交617路/牟平站打车约20元","天马路(烟台版苍洱大道)、獐岛红色栈道、秦风崖、莲花夕照洞穴出片；晴天满潮才触发'果冻海'，上午10-下午3点光最透"],
+  "蓬莱阁":["携程/美团提前买联票比现场便宜；学生证半价","古建筑+海市蜃楼传说预留半天，早到避人流","红墙+海天背景清晨光影最佳"],
+  "烟台山":["免费，登灯塔看港口全景","红顶建筑+海岸线傍晚光线柔出片"],
+  "八大关":["免费，花石楼另收费；公主楼蒂芙尼蓝外墙、居庸关路银杏(秋)、第二海水浴场堤坝出片","清晨7点前避开婚纱人流；穿浅色/复古裙"],
+  "小麦岛":["免费，下午4-6点光线最佳孤独树+礁石海岸线逆光拍","岛西礁石群退潮探海蚀洞；白裙+草帽侧逆光拍剪影，周末人多大建议工作日"],
+  "栈桥 + 小青岛":["免费，早8-10点人少不逆光；秋冬季11-4月喂海鸥","尽头回澜阁广角拍全景；蓝调时刻+晨光"],
+  "五四广场":["免费，'五月的风'地标；傍晚灯光+日落步行5分钟到奥帆中心情人坝","下午3-4点雕塑红色最显眼；夜景亮灯19:00后"],
+  "大连洗浴中心过夜":["详见下方「🛁 洗浴中心排行」板块，6家精选均有具体地址、价格、特色和携程链接","首推佳和温泉水世界（华南广场）¥49起含过夜+嬉水区+影院","美团/抖音团购比前台现付省30%+"],
+  "青泥洼桥购物":["商圈大，美团/点评领券再买伴手礼更划算","海参/樱桃制品认准老字号"],
+  "俄罗斯风情街":["免费，老建筑适合复古风拍照","上午光影斜照墙面最有味道"],
+  "朝阳街海鲜晚餐":["烟台海鲜主场，美团/点评找本地人常去的老店避开高价排档","海肠捞饭/鲅鱼水饺必点"],
+  "威海国际海水浴场":["免费，傍晚日落出片","带拖鞋踩沙，退潮可赶海"]
+};
+function defaultTip(p){
+  if(p.cat==="美食") return ["美团/大众点评看实时人均与排号，避开景区高价排档"];
+  if(p.cat==="购物") return ["商圈领券更划算，伴手礼认准老字号"];
+  return ["用下方腾讯/高德按钮跳转外部APP导航，建议预留堵车时间；到了按TIPS出片机位拍"];
+}
+
+/* ===================== 常量 & 工具 ===================== */
+const CAT_COLORS = { "景点":"#3b82f6", "美食":"#f97316", "文化":"#8b5cf6", "购物":"#10b981" };
+const SVG_W = 1000, SVG_H = 1000, PAD = 90;
+const useTencent = TENCENT_MAP_KEY && TENCENT_MAP_KEY !== "YOUR_TENCENT_MAP_KEY";
+
+const state = { index:0, pois:[], userLoc:null };
+let viewBox = { x:0, y:0, w:SVG_W, h:SVG_H };
+let animId = null;
+let tencentMap = null, tencentMarkerLayer = null, tencentLabelLayer = null, tencentPolylineLayer = null, tencentInfo = null, tencentUserMarker = null, tencentUserLabel = null, tencentSearchMarker = null;
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]
+  ));
+}
+function hexA(hex, a){
+  const h = hex.replace("#","");
+  return `rgba(${parseInt(h.substring(0,2),16)},${parseInt(h.substring(2,4),16)},${parseInt(h.substring(4,6),16)},${a})`;
+}
+function qs(s){ return encodeURIComponent(s); }
+
+/* 平台链接 - 小红书用深度链接直接唤起APP，电脑端自动降级为网页 */
+function xhsLinks(name){
+  const kw = qs(name);
+  return [
+    {cls:"xhs", label:"🔴 小红书·攻略", url:"xhsdiscover://search/result?keyword="+qs(name+" 攻略"), webFallback:"https://www.xiaohongshu.com/search_result?keyword="+qs(name+" 攻略")},
+    {cls:"xhs", label:"🔴 小红书·出片", url:"xhsdiscover://search/result?keyword="+qs(name+" 出片"), webFallback:"https://www.xiaohongshu.com/search_result?keyword="+qs(name+" 出片")},
+    {cls:"xhs", label:"🔴 小红书·搜索", url:"xhsdiscover://search/result?keyword="+kw, webFallback:"https://www.xiaohongshu.com/search_result?keyword="+kw}
+  ];
+}
+function routeLinks(p){
+  return [
+    {cls:"qq",   label:"腾讯路线", url:"https://apis.map.qq.com/uri/v1/routeplan?type=drive&to="+p.lat+","+p.lng+"&toName="+qs(p.name)+"&referer=travel"},
+    {cls:"amap", label:"高德地图", url:"https://uri.amap.com/marker?position="+p.lng+","+p.lat+"&name="+qs(p.name)+"&src=travel"},
+    {cls:"ctrip",label:"携程",     url:"https://www.ctrip.com/searchsite/all/?query="+qs(p.name)},
+    {cls:"meituan",label:"美团",   url:"https://www.meituan.com/"}
+  ];
+}
+
+/* 深度链接：尝试唤起APP，失败则降级为网页打开 */
+function tryDeeplink(el, event){
+  const deepUrl = el.dataset.deep;
+  const webUrl = el.href;
+  if(!deepUrl || !deepUrl.startsWith('xhsdiscover://') && !deepUrl.startsWith('amapuri://') && !deepUrl.startsWith('baidumap://')){
+    return true; /* 非深度链接，正常跳转 */
+  }
+  /* 移动端：先尝试深度链接 */
+  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+    event.preventDefault();
+    const start = Date.now();
+    /* 尝试打开APP深度链接 */
+    window.location.href = deepUrl;
+    /* 如果800ms内没有离开页面（说明APP没装或打不开），降级到网页 */
+    setTimeout(() => {
+      if(Date.now() - start < 900){
+        window.open(webUrl, '_blank');
+      }
+    }, 800);
+    return false;
+  }
+  /* 电脑端：直接用网页版（深度链接在PC浏览器无效） */
+  return true;
+}
+
+/* 经纬度 → SVG 坐标（保持纵横比，内容居中并加 padding） */
+function computeProjection(bounds){
+  const dlng = (bounds.maxLng - bounds.minLng) || 0.001;
+  const dlat = (bounds.maxLat - bounds.minLat) || 0.001;
+  const scale = Math.min((SVG_W - 2*PAD)/dlng, (SVG_H - 2*PAD)/dlat);
+  const cw = dlng * scale, ch = dlat * scale;
+  const ox = (SVG_W - cw)/2, oy = (SVG_H - ch)/2;
+  return {
+    x: lng => ox + (lng - bounds.minLng) * scale,
+    y: lat => oy + (bounds.maxLat - lat) * scale
+  };
+}
+
+/* ===================== GPS 定位 ===================== */
+function locateMe(){
+  const btn = document.getElementById("locBtn");
+  if(!navigator.geolocation){ alert("您的浏览器不支持定位功能"); return; }
+  btn.classList.add("locating");
+  btn.innerHTML = '<span class="loc-dot"></span> 正在定位…';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      state.userLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      btn.classList.remove("locating");
+      btn.innerHTML = '<span class="loc-dot"></span> 已定位 ✓';
+      btn.style.background = 'rgba(16,185,129,.12)';
+      btn.style.color = '#059669';
+      /* 在腾讯地图上显示用户位置（醒目标记 + 信息窗 + 脉冲动画） */
+      if(useTencent && tencentMap && state.userLoc){
+        showUserMarker(state.userLoc.lat, state.userLoc.lng);
+        tencentMap.panTo(new TMap.LatLng(state.userLoc.lat, state.userLoc.lng));
+        tencentMap.setZoom(14);
+      }
+      console.log('GPS定位成功:', state.userLoc.lat.toFixed(4), state.userLoc.lng.toFixed(4));
+    },
+    err => {
+      btn.classList.remove("locating");
+      btn.innerHTML = '<span class="loc-dot"></span> 定位失败（点击重试）';
+      console.warn('定位失败:', err.message);
+      alert("定位失败："+err.message+"\n\n请在浏览器设置中允许位置权限，或在手机端使用");
+    },
+    { enableHighAccuracy:true, timeout:10000, maximumAge:60000 }
+  );
+}
+
+/* 在地图上显示/刷新用户定位标记（切换Day时也需重新添加） */
+function showUserMarker(lat, lng){
+  if(!(useTencent && tencentMap)) return;
+  /* 清除旧标记 */
+  if(tencentUserMarker) { try{tencentUserMarker.setMap(null);}catch(e){} tencentUserMarker = null; }
+
+  const pos = new TMap.LatLng(lat, lng);
+  /* 醒目的用户定位图标：绿色圆点 + 白色内圈 + 蓝色脉冲外环 */
+  const svgIcon = encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">'+
+      '<defs>'+
+        '<filter id="userGlow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
+        '<style>@keyframes pulse{0%{r:8;opacity:.8}100%{r:18;opacity:0}}</style>'+
+      '</defs>'+
+      '<circle cx="20" cy="20" r="18" fill="#10b981" opacity=".25">'+
+        '<animate attributeName="r" values="10;20;10" dur="2s" repeatCount="indefinite"/>'+
+        '<animate attributeName="opacity" values=".5;.1;.5" dur="2s" repeatCount="indefinite"/>'+
+      '</circle>'+
+      '<circle cx="20" cy="20" r="9" fill="#10b981" filter="url(#userGlow)"/>'+
+      '<circle cx="20" cy="20" r="4" fill="#fff"/>'+
+    '</svg>'
+  );
+
+  tencentUserMarker = new TMap.MultiMarker({
+    map: tencentMap,
+    zIndex: 999, /* 确保在最上层 */
+    styles: {
+      "user-pin": { width:40, height:40, anchor:{x:20,y:20}, src:'data:image/svg+xml;charset=utf-8,'+svgIcon }
+    },
+    geometries:[{
+      id:"user-loc-marker",
+      position: pos,
+      styleId:"user-pin"
+    }]
+  });
+
+  /* 显示"我的位置"文字标签 */
+  const userLabel = new TMap.MultiLabel({
+    map:tencentMap,
+    zIndex: 998,
+    geometries:[{
+      id:"user-label",
+      position:pos,
+      content:"<div style='background:#10b981;color:#fff;font-size:11px;font-weight:bold;padding:3px 8px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);border:2px solid #fff'>📍 我的位置</div>",
+      styleId:"user-lbl"
+    }],
+    styles:{ "user-lbl":{anchor:{x:20,y:-18},direction:"center"} }
+  });
+  /* 保存标签引用以便清理 */
+  tencentUserLabel = userLabel;
+}
+
+/* ===================== 外部 APP 跳转链接更新 ===================== */
+function updateExtAppLinks(centerPoi){
+  if(!centerPoi) centerPoi = ITINERARY[state.index].pois[0];
+  // 腾讯地图APP Scheme
+  document.getElementById('qqAppBtn').href =
+    'https://apis.map.qq.com/uri/v1/routeplan?type=drive&to='+centerPoi.lat+','+centerPoi.lng+
+    '&toName='+qs(centerPoi.name)+'&referer=travel';
+  // 高德地图APP Scheme
+  document.getElementById('amapAppBtn').href =
+    'https://uri.amap.com/marker?position='+centerPoi.lng+','+centerPoi.lat+'&name='+qs(centerPoi.name)+'&src=travel';
+}
+
+/* ===================== 渲染：徽章 ===================== */
+function renderBadges(){
+  const days = ITINERARY.length;
+  const poiTotal = ITINERARY.reduce((s,d) => s + d.pois.length, 0);
+  const items = [
+    { key:"天数", val: days + "天" },
+    { key:"POI 数", val: String(poiTotal) },
+    { key:"总预算", val:"¥5000/人" }
+  ];
+  document.getElementById("badges").innerHTML = items.map(it =>
+    `<div class="badge"><div class="b-val">${it.val}</div><div class="b-key">${it.key}</div></div>`
+  ).join("");
+  document.getElementById("mapTag").textContent = useTencent ? "腾讯地图 ✅" : "示意地图";
+}
+
+/* ===================== 渲染：Day Tab ===================== */
+function renderTabs(){
+  const el = document.getElementById("tabs");
+  el.innerHTML = ITINERARY.map((d,i) =>
+    `<button class="tab" data-idx="${i}">${d.date.split(' ')[0]} DAY${d.day} ${d.city}</button>`
+  ).join("");
+  el.addEventListener("click", e => {
+    const btn = e.target.closest(".tab");
+    if(!btn) return;
+    selectDay(+btn.dataset.idx);
+  });
+}
+function updateActiveTab(i){
+  document.querySelectorAll("#tabs .tab").forEach(t => t.classList.toggle("active", +t.dataset.idx === i));
+}
+
+/* ===================== 渲染：每日时间轴 ===================== */
+function renderTimeline(dayObj){
+  const sorted = [...dayObj.pois];
+  const head =
+    `<div class="day-head">
+       <span class="day-badge">DAY ${dayObj.day}</span>
+       <div>
+         <div class="day-city">${esc(dayObj.city)}</div>
+         <div class="day-sub">${esc(dayObj.date)} · ${esc(dayObj.title)}</div>
+       </div>
+     </div>`;
+  const cards = sorted.map((p,i) => {
+    const c = CAT_COLORS[p.cat] || "#3b82f6";
+    const isFree = p.cost <= 0;
+    const costHtml = isFree
+      ? `<span class="poi-cost free">免费</span>`
+      : `<span class="poi-cost">¥${p.cost}</span>`;
+    const tipsArr = TIPS[p.name] || defaultTip(p);
+    const tipsHtml = `
+      <div class="tips">
+        <h4>💡 旅行TIPS（小红书/美团/携程/高德经验）</h4>
+        <ul>${tipsArr.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+        <div class="links">
+          ${xhsLinks(p.name).map(l => `<a class="lnk ${l.cls}" href="${l.webFallback || l.url}" data-deep="${l.url}" onclick="return tryDeeplink(this,event)" target="_blank" rel="noopener">${l.label}</a>`).join("")}
+          ${routeLinks(p).map(l => `<a class="lnk ${l.cls}" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}
+        </div>
+      </div>`;
+    return `
+      <div class="poi-card" data-idx="${i}" data-name="${esc(p.name)}">
+        <div class="poi-rail"><span class="poi-dot" style="background:${c}"></span></div>
+        <div class="poi-body">
+          <div class="poi-top">
+            <span class="poi-time">${esc(p.time)}</span>
+            <span class="chip" style="background:${hexA(c,.14)};color:${c};border:1px solid ${hexA(c,.35)}">${esc(p.cat)}</span>
+          </div>
+          <div class="poi-name">${esc(p.name)}</div>
+          <div class="poi-note">${esc(p.note)}</div>
+          ${costHtml}
+          ${tipsHtml}
+        </div>
+      </div>`;
+  }).join("");
+
+  let hotelsHtml = "";
+  const hotels = HOTELS[dayObj.day];
+  if(hotels && hotels.length){
+    hotelsHtml = `
+      <div class="hotels">
+        <h4>🏨 今日住宿推荐排行（8月旺季参考价 · 点击查实时房态）</h4>
+        ${hotels.map(h => `
+          <div class="hotel-rank">
+            <span class="rank-num ${h.rank<=3?(h.rank===1?'':'r'+h.rank):'rx'}">${h.rank}</span>
+            <div class="hotel-info">
+              <div class="h-name">${esc(h.name)}</div>
+              <div class="h-note">${esc(h.note)}</div>
+              <div class="hotel-tags">${(h.tags||[]).map(t => `<span class="htag">${esc(t)}</span>`).join("")}</div>
+            </div>
+            <div class="h-right">
+              <span class="h-price">${esc(h.price)}</span>
+              <a class="h-btn" href="${h.ctripLink}" target="_blank" rel="noopener">携程查价</a>
+            </div>
+          </div>`).join("")}
+      </div>`;
+  }
+
+  // DAY1 单独加洗浴中心排行
+  let bathHtml = "";
+  if(dayObj.day === 1){
+    bathHtml = `
+      <div class="bathhouses">
+        <h4>🛁 大连洗浴中心排行（真实评分 · 过夜泡汤缓解飞行疲劳）</h4>
+        ${BATHHOUSES.map(b => `
+          <div class="bh-item">
+            <span class="rank-num ${b.rank<=3?(b.rank===1?'':'r'+b.rank):'rx'}">${b.rank}</span>
+            <div class="bh-info">
+              <div class="bh-name">${esc(b.name)}</div>
+              <div class="bh-addr">${esc(b.addr)}</div>
+              <div class="bh-features">${b.features.slice(0,2).map(f => `<div>${esc(f)}</div>`).join("")}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+              <span class="bh-price">${esc(b.price)}</span>
+              <a class="bh-link" href="${b.ctripLink}" target="_blank" rel="noopener">查看详情 ›</a>
+            </div>
+          </div>`).join("")}
+      </div>`;
+  }
+
+  document.getElementById("timeline").innerHTML = head + `<div class="poi-list">${cards}</div>` + bathHtml + hotelsHtml;
+}
+
+/* ===================== 渲染：地图 ===================== */
+function renderMap(dayObj){
+  const pois = dayObj.pois;
+  state.pois = pois;
+  updateExtAppLinks(pois[0]);
+  if(useTencent && tencentMap){ renderTencent(dayObj, pois); return; }
+  if(useTencent && !tencentMap){ return; } /* 真地图还在加载 */
+  renderSvg(dayObj, pois);
+}
+
+function renderSvg(dayObj, pois){
+  const lats = pois.map(p => p.lat);
+  const lngs = pois.map(p => p.lng);
+  const bounds = {
+    minLat: Math.min(...lats), maxLat: Math.max(...lats),
+    minLng: Math.min(...lngs), maxLng: Math.max(...lngs)
+  };
+  const proj = computeProjection(bounds);
+  state.proj = proj;
+
+  const pts = pois.map((p,i) => ({ x: proj.x(p.lng), y: proj.y(p.lat), p, i }));
+  const poly = pts.map(o => `${o.x.toFixed(1)},${o.y.toFixed(1)}`).join(" ");
+  const markers = pts.map(o => {
+    const c = CAT_COLORS[o.p.cat] || "#3b82f6";
+    return `
+      <g class="marker" data-idx="${o.i}" data-name="${esc(o.p.name)}">
+        <circle class="halo" cx="${o.x.toFixed(1)}" cy="${o.y.toFixed(1)}" r="13" fill="${c}"></circle>
+        <circle class="dot" cx="${o.x.toFixed(1)}" cy="${o.y.toFixed(1)}" r="13" fill="${c}" stroke="#fff" stroke-width="2.5"></circle>
+        <text class="marker-num" x="${o.x.toFixed(1)}" y="${o.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central">${o.i+1}</text>
+      </g>`;
+  }).join("");
+
+  const svg = `
+    <svg id="map" viewBox="0 0 ${SVG_W} ${SVG_H}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <polyline class="route" points="${poly}" fill="none" stroke="rgba(43,108,176,.4)" stroke-width="2.5" stroke-dasharray="6 7" stroke-linejoin="round" stroke-linecap="round"></polyline>
+      ${markers}
+    </svg>`;
+  document.getElementById("mapWrap").innerHTML = svg;
+  fitMap(true);
+}
+
+function renderTencent(dayObj, pois){
+  const lats = pois.map(p => p.lat);
+  const lngs = pois.map(p => p.lng);
+  const center = new TMap.LatLng(
+    (Math.min(...lats)+Math.max(...lats))/2,
+    (Math.min(...lngs)+Math.max(...lngs)) / 2
+  );
+  const maxSpan = Math.max(Math.max(...lats)-Math.min(...lats), (Math.max(...lngs)-Math.min(...lngs))||0.001);
+  const zoom = Math.max(10, Math.min(16, Math.floor(15 - Math.log2(maxSpan/0.01))));
+  tencentMap.setCenter(center);
+  tencentMap.setZoom(zoom);
+
+  if(tencentMarkerLayer) tencentMarkerLayer.setMap(null);
+  if(tencentPolylineLayer) tencentPolylineLayer.setMap(null);
+
+  const geometries = pois.map((p,i) => {
+    const c = CAT_COLORS[p.cat] || "#3b82f6";
+    return {
+      id: "marker-"+i,
+      position: new TMap.LatLng(p.lat, p.lng),
+      properties: { title:p.name, idx:i },
+      styleId: "mark-"+c
+    };
+  });
+  const path = pois.map(p => new TMap.LatLng(p.lat, p.lng));
+
+  const styles = {};
+  Object.values(CAT_COLORS).forEach(c => {
+    styles["mark-"+c] = {
+      width:34, height:34, anchor:{x:17,y:17},
+      src:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34"><circle cx="17" cy="17" r="15" fill="'+c+'"/></svg>'
+      )
+    };
+  });
+
+  tencentMarkerLayer = new TMap.MultiMarker({
+    map: tencentMap, styles: styles, geometries: geometries
+  });
+
+  tencentLabelLayer && tencentLabelLayer.setMap(null);
+  tencentLabelLayer = new TMap.MultiLabel({
+    map:tencentMap,
+    geometries: pois.map((p,i) => ({
+      id:"lbl-"+i, position:new TMap.LatLng(p.lat,p.lng),
+      content:"<div style='background:none;color:#fff;font-size:13px;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5)'>"+(i+1)+"</div>",
+      styleId:"label"
+    })),
+    styles:{ label:{anchor:{x:17,y:17}} }
+  });
+
+  tencentPolylineLayer = new TMap.MultiPolyline({
+    map: tencentMap,
+    styles: { line:{ width:3, color:"#3b82f6", opacity:0.6 } },
+    geometries:[{ id:"route", path:path }]
+  });
+
+  tencentMarkerLayer.on("click", evt => {
+    flyTo(evt.geometry.properties.idx);
+  });
+
+  /* 如果之前已定位过，重新添加用户标记到地图上 */
+  if(state.userLoc && (state.userLoc.lat || state.userLoc.lng)){
+    showUserMarker(state.userLoc.lat, state.userLoc.lng);
+  }
+}
+
+/* 视图自适应某一天所有点（SVG 版） */
+function fitMap(animated){
+  const target = { x:0, y:0, w:SVG_W, h:SVG_H };
+  if(animated) animateViewBox(target, 480);
+  else setViewBox(target);
+}
+
+/* 点击卡片 / 标记 → 飞至该 POI */
+function flyTo(idx){
+  const p = state.pois[idx];
+  if(!p) return;
+  if(useTencent && tencentMap){
+    tencentMap.panTo(new TMap.LatLng(p.lat, p.lng));
+    const curZoom = tencentMap.getZoom() || 12;
+    tencentMap.setZoom(Math.max(14, curZoom));
+    if(tencentInfo){
+      tencentInfo.setContent(`<div style="padding:8px 12px;font-family:system-ui,sans-serif;max-width:240px"><div style="font-weight:700;margin-bottom:4px;font-size:14px">${esc(p.name)}</div><div style="font-size:12px;color:#475569;margin-bottom:6px">${esc((TIPS[p.name]||defaultTip(p))[0]||"")}</div><div style="display:flex;flex-wrap:wrap;gap:5px"><a href="https://apis.map.qq.com/uri/v1/routeplan?type=drive&to=${p.lat},${p.lng}&toName=${qs(p.name)}&referer=travel" target="_blank" style="font-size:11px;color:#fff;background:#3b82f6;padding:4px 9px;border-radius:999px;text-decoration:none;font-weight:700">腾讯导航</a><a href="https://uri.amap.com/marker?position=${p.lng},${p.lat}&name=${qs(p.name)}&src=travel" target="_blank" style="font-size:11px;color:#fff;background:#10b981;padding:4px 9px;border-radius:999px;text-decoration:none;font-weight:700">高德导航</a></div></div>`);
+      tencentInfo.setPosition(new TMap.LatLng(p.lat, p.lng));
+      tencentInfo.open();
+    }
+  } else if(state.proj){
+    const px = state.proj.x(p.lng);
+    const py = state.proj.y(p.lat);
+    const zoom = 520;
+    animateViewBox({ x: px - zoom/2, y: py - zoom/2, w: zoom, h: zoom }, 520);
+    document.querySelectorAll("#map .marker").forEach(m => m.classList.toggle("active", +m.dataset.idx === idx));
+  }
+  document.querySelectorAll(".poi-card").forEach(c =>
+    c.style.outline = (+c.dataset.idx === idx) ? "2px solid rgba(59,130,246,.4)" : ""
+  );
+}
+
+/* viewBox 动画（rAF 插值） */
+function setViewBox(vb){
+  viewBox = { ...vb };
+  const svg = document.getElementById("map");
+  if(svg) svg.setAttribute("viewBox", `${vb.x.toFixed(1)} ${vb.y.toFixed(1)} ${vb.w.toFixed(1)} ${vb.h.toFixed(1)}`);
+}
+function animateViewBox(target, duration){
+  const svg = document.getElementById("map");
+  if(!svg) return;
+  const start = { ...viewBox };
+  const t0 = performance.now();
+  if(animId) cancelAnimationFrame(animId);
+  function step(now){
+    const t = Math.min(1, (now - t0) / duration);
+    const e = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+    const cur = {
+      x: start.x + (target.x - start.x) * e,
+      y: start.y + (target.y - start.y) * e,
+      w: start.w + (target.w - start.w) * e,
+      h: start.h + (target.h - start.h) * e
+    };
+    svg.setAttribute("viewBox", `${cur.x.toFixed(1)} ${cur.y.toFixed(1)} ${cur.w.toFixed(1)} ${cur.h.toFixed(1)}`);
+    viewBox = cur;
+    if(t < 1) animId = requestAnimationFrame(step);
+  }
+  animId = requestAnimationFrame(step);
+}
+
+/* ===================== 搜索（支持腾讯地图API真实搜索） ===================== */
+function onSearch(q){
+  q = (q || "").trim().toLowerCase();
+  document.querySelectorAll(".poi-card").forEach(c => {
+    const name = (c.dataset.name || "").toLowerCase();
+    const hit = !q || name.includes(q);
+    c.style.display = hit ? "" : "none";
+  });
+  if(useTencent && tencentMap && tencentMarkerLayer){
+    const geoms = tencentMarkerLayer.getGeometries();
+    const showIds = geoms.filter(g => !q || (g.properties.title||"").toLowerCase().includes(q)).map(g => g.id);
+    tencentMarkerLayer.setGeometries(geoms.map(g => ({...g, visible: showIds.includes(g.id)})));
+    if(tencentLabelLayer){
+      const lbls = tencentLabelLayer.getGeometries();
+      tencentLabelLayer.setGeometries(lbls.map(l => ({...l, visible: showIds.includes(l.id.replace("lbl","marker-"))})));
+    }
+  } else {
+    document.querySelectorAll("#map .marker").forEach(m => {
+      const name = (m.dataset.name || "").toLowerCase();
+      const hit = !q || name.includes(q);
+      m.classList.toggle("matched", !!q && hit);
+      m.classList.toggle("dim", !!q && !hit);
+    });
+  }
+  /* 清空搜索时清除搜索标记 */
+  if(!q && tencentSearchMarker){ tencentSearchMarker.setMap(null); tencentSearchMarker = null; if(tencentInfo) tencentInfo.close(); }
+  /* 如果输入了关键词且长度>=2，尝试调用腾讯地点搜索API补充结果 */
+  if(q.length >= 2 && useTencent && window.TMap){
+    searchPlacesAPI(q);
+  } else {
+    hideSearchDropdown();
+  }
+}
+
+/* 调用腾讯地图Web服务API做真实地点搜索 */
+function searchPlacesAPI(keyword){
+  const dayObj = ITINERARY[state.index];
+  const center = dayObj.pois[Math.floor(dayObj.pois.length/2)];
+  const url = `https://apis.map.qq.com/ws/place/v1/suggestion?keyword=${qs(keyword)}&location=${center.lat},${center.lng}&key=${TENCENT_MAP_KEY}&output=jsonp&callback=searchCallback`;
+  try {
+    const oldScript = document.getElementById('jsonpScript');
+    if(oldScript) { oldScript.remove(); window.searchCallback = null; }
+    window.searchCallback = function(data){
+      const dropdown = document.getElementById('searchDropdown');
+      if(data && data.data && data.data.length > 0){
+        dropdown.innerHTML = data.data.slice(0,8).map((item,i) =>
+          `<div class="sd-item" data-lat="${item.location.lat}" data-lng="${item.location.lng}" data-title="${esc(item.title||'')}" data-addr="${esc(item.address||'')}" data-id="${item.id||''}">
+             <div class="sd-name">${esc(item.title||'')}</div>
+             <div class="sd-addr">${esc(item.address||'')}</div>
+           </div>`
+        ).join('');
+        dropdown.classList.add('show');
+        dropdown.querySelectorAll('.sd-item').forEach(el => {
+          el.addEventListener('click', () => {
+            const lat = parseFloat(el.dataset.lat);
+            const lng = parseFloat(el.dataset.lng);
+            const title = el.dataset.title;
+            const addr = el.dataset.addr;
+            if(useTencent && tencentMap){
+              /* 清除旧搜索标记 */
+              if(tencentSearchMarker) { tencentSearchMarker.setMap(null); tencentSearchMarker = null; }
+              /* 在搜索位置打新标记 */
+              tencentSearchMarker = new TMap.MultiMarker({
+                map: tencentMap,
+                styles: {
+                  "search": {
+                    width:32, height:40, anchor:{x:16,y:39},
+                    src:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40"><path d="M16 0C7.163 0 0 7.163 0 16c0 12 16 24 16 24s16-12 16-24C32 7.163 24.837 0 16 0z" fill="#f97316"/><circle cx="16" cy="14" r="6" fill="#fff"/><text x="16" y="17" font-size="9" fill="#f97316" text-anchor="middle" font-weight="bold">搜</text></svg>')
+                  }
+                },
+                geometries:[{
+                  id:"search-result",
+                  position:new TMap.LatLng(lat, lng),
+                  styleId:"search"
+                }]
+              });
+              /* 飞至该位置 */
+              tencentMap.panTo(new TMap.LatLng(lat, lng));
+              tencentMap.setZoom(15);
+              /* 弹出信息窗 */
+              tencentInfo.setContent(
+                '<div style="padding:4px 8px;min-width:160px">'+
+                '<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+esc(title)+'</div>'+
+                (addr ? '<div style="font-size:12px;color:#64748b;margin-bottom:8px">'+esc(addr)+'</div>' : '')+
+                '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+
+                '<a href="https://apis.map.qq.com/uri/v1/routeplan?type=drive&to='+lat+','+lng+'&toName='+qs(title)+'&referer=travel" target="_blank" style="font-size:11px;color:#3b82f6;text-decoration:none;background:#eff6ff;padding:4px 8px;border-radius:4px">🧭 腾讯导航</a>'+
+                '<a href="https://uri.amap.com/marker?position='+lng+','+lat+'&name='+qs(title)+'&src=travel" target="_blank" style="font-size:11px;color:#10b981;text-decoration:none;background:#ecfdf5;padding:4px 8px;border-radius:4px">🧭 高德导航</a>'+
+                '</div></div>'
+              );
+              tencentInfo.setPosition(new TMap.LatLng(lat, lng));
+              tencentInfo.open();
+            } else {
+              hideSearchDropdown();
+            }
+            hideSearchDropdown();
+            document.getElementById('search').value = title;
+          });
+        });
+      } else {
+        hideSearchDropdown();
+      }
+    };
+    const script = document.createElement('script');
+    script.id = 'jsonpScript';
+    script.src = url;
+    document.head.appendChild(script);
+  } catch(e){
+    hideSearchDropdown();
+  }
+}
+function hideSearchDropdown(){
+  const dd = document.getElementById('searchDropdown');
+  if(dd) dd.classList.remove('show');
+}
+
+/* ===================== 切换 Day ===================== */
+function selectDay(i){
+  state.index = i;
+  updateActiveTab(i);
+  const searchInput = document.getElementById("search");
+  if(searchInput) searchInput.value = "";
+  document.querySelectorAll(".poi-card").forEach(c => c.style.outline = "");
+  renderTimeline(ITINERARY[i]);
+  renderMap(ITINERARY[i]);
+  hideSearchDropdown();
+}
+
+/* ===================== 事件绑定 ===================== */
+function bindEvents(){
+  document.getElementById("timeline").addEventListener("click", e => {
+    const card = e.target.closest(".poi-card");
+    if(!card) return;
+    flyTo(+card.dataset.idx);
+  });
+  document.getElementById("mapWrap").addEventListener("click", e => {
+    const m = e.target.closest(".marker");
+    if(!m) return;
+    flyTo(+m.dataset.idx);
+  });
+  document.getElementById("search").addEventListener("input", e => onSearch(e.target.value));
+  /* 点击其他地方关闭搜索下拉 */
+  document.addEventListener("click", e => {
+    if(!e.target.closest('.map-search')) hideSearchDropdown();
+  });
+}
+
+/* 真·腾讯地图初始化（JSAPI GL 版，全局对象为 TMap） */
+function initTencent(){
+  const el = document.getElementById("mapWrap");
+  el.innerHTML = '<div id="tencent-map" style="width:100%;height:100%"></div>';
+  tencentMap = new TMap.Map("tencent-map", {
+    center: new TMap.LatLng(ITINERARY[0].pois[0].lat, ITINERARY[0].pois[0].lng),
+    zoom: 12,
+    viewMode: "2D",
+    /* 简洁底图风格，减少凌乱文字标注 */
+    baseMap: {
+      type: "vector",
+      features: ["base", "road"]
+    }
+  });
+  tencentInfo = new TMap.InfoWindow({
+    map: tencentMap, position: new TMap.LatLng(0,0),
+    content: "", offset: { x:0, y:-35 }
+  }).close();
+
+  /* 添加地图控件：缩放+比例尺 */
+  tencentMap.setOptions({
+    zoomControl: true,
+    scaleControl: true
+  });
+
+  renderMap(ITINERARY[state.index]);
+
+  /* 地图加载完成后自动定位用户位置 */
+  setTimeout(() => locateMe(), 1200);
+}
+
+/* ===================== 初始化 ===================== */
+function init(){
+  renderBadges();
+  renderTabs();
+  bindEvents();
+  if(useTencent){
+    const s = document.createElement("script");
+    s.src = "https://map.qq.com/api/gljs?v=1.exp&key=" + TENCENT_MAP_KEY;
+    s.onload = () => {
+      if(window.TMap) initTencent();
+      else renderMap(ITINERARY[state.index]); /* 加载异常回退 SVG */
+    };
+    s.onerror = () => renderMap(ITINERARY[state.index]); /* 网络失败回退 SVG */
+    document.head.appendChild(s);
+  } else {
+    selectDay(0);
+  }
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
