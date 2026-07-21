@@ -281,6 +281,50 @@
   .legend{display:flex;flex-wrap:wrap;gap:14px;margin:4px 0 14px;}
   .legend span{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:600;}
   .legend i{width:11px;height:11px;border-radius:50%;display:inline-block;}
+
+  /* ---------- Toast 提示（复制成功等） ---------- */
+  .toast{
+    position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:rgba(15,23,42,.85);color:#fff;font-size:13px;font-weight:700;
+    padding:10px 20px;border-radius:12px;white-space:nowrap;z-index:9999;
+    pointer-events:none;opacity:0;transition:all .3s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,.2);backdrop-filter:blur(8px);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- 复制按钮 ---------- */
+  .cpy{font-size:11px!important;font-weight:700!important;text-decoration:none!important;
+    padding:4px 9px!important;border-radius:999px!important;border:1px dashed currentColor!important;
+    cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:3px;user-select:none;}
+  .cpy:hover{background:currentColor;color:#fff!important;}
+  .cpy:active{transform:scale(.92);}
+  .cpy .c-icon{font-size:12px;}
+
+  /* ---------- GPS 定位状态增强 ---------- */
+  .loc-btn.success{background:rgba(16,185,129,.12)!important;color:#059669!important;border-color:rgba(16,185,129,.3)!important;}
+
+  /* ---------- 用户定位标记 DOM 覆盖层（替代 TMap MultiLabel） ---------- */
+  .user-marker-overlay{
+    position:absolute;z-index:500;pointer-events:none;transform:translate(-50%,-100%);
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .user-pin{
+    width:44px;height:44px;border-radius:50%;background:#10b981;
+    border:3px solid #fff;box-shadow:0 2px 12px rgba(16,185,129,.5),0 0 0 8px rgba(16,185,129,.15);
+    display:flex;align-items:center;justify-content:center;
+    animation:userPulse 2s ease-in-out infinite;
+  }
+  .user-pin::after{content:"";width:14px;height:14px;border-radius:50%;background:#fff;}
+  @keyframes userPulse{
+    0%,100%{box-shadow:0 2px 12px rgba(16,185,129,.5),0 0 0 8px rgba(16,185,129,.15);}
+    50%{box-shadow:0 2px 12px rgba(16,185,129,.5),0 0 0 16px rgba(16,185,129,.25);}
+  }
+  .user-label{
+    background:#10b981;color:#fff;font-size:11px;font-weight:bold;
+    padding:3px 10px;border-radius:10px;margin-top:4px;
+    white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);
+    border:2px solid #fff;
+  }
 </style>
 </head>
 <body>
@@ -344,6 +388,9 @@
     </ul>
     <div class="note">所有价格为平台实时均价估算，以预订时实际成交为准。洗浴中心/酒店均附真实店名与携程查价链接，点击可查看8月实时房态与价格。真·腾讯地图已启用（有效期至 2026-07-30）。</div>
   </section>
+
+  <!-- Toast 容器 -->
+  <div class="toast" id="toast"></div>
 
 </div>
 
@@ -602,46 +649,67 @@ function hexA(hex, a){
 }
 function qs(s){ return encodeURIComponent(s); }
 
-/* 平台链接 - 小红书用深度链接直接唤起APP，电脑端自动降级为网页 */
+/* ===================== Toast 提示 & 复制功能 ===================== */
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2000);
+}
+function copyToClipboard(text, successMsg){
+  /* 优先用现代 API，降级用 textarea */
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(() => showToast(successMsg || "✅ 已复制！打开APP粘贴搜索")).catch(() => fallbackCopy(text, successMsg));
+  } else {
+    fallbackCopy(text, successMsg);
+  }
+}
+function fallbackCopy(text, successMsg){
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); showToast(successMsg || "✅ 已复制！打开APP粘贴搜索"); } catch(e){ showToast("❌ 复制失败，请手动复制"); }
+  document.body.removeChild(ta);
+}
+
+/* 平台链接 - 全部改为「一键复制搜索词」+ 直接网页链接 */
 function xhsLinks(name){
-  const kw = qs(name);
+  const kw = name;
   return [
-    {cls:"xhs", label:"🔴 小红书·攻略", url:"xhsdiscover://search/result?keyword="+qs(name+" 攻略"), webFallback:"https://www.xiaohongshu.com/search_result?keyword="+qs(name+" 攻略")},
-    {cls:"xhs", label:"🔴 小红书·出片", url:"xhsdiscover://search/result?keyword="+qs(name+" 出片"), webFallback:"https://www.xiaohongshu.com/search_result?keyword="+qs(name+" 出片")},
-    {cls:"xhs", label:"🔴 小红书·搜索", url:"xhsdiscover://search/result?keyword="+kw, webFallback:"https://www.xiaohongshu.com/search_result?keyword="+kw}
+    {cls:"xhs", label:'📋 小红书·攻略', cpy: name+" 攻略", cpyMsg:"✅ 已复制攻略关键词！打开小红书APP粘贴"},
+    {cls:"xhs", label:'📋 小红书·出片', cpy: name+" 出片", cpyMsg:"✅ 已复制出片关键词！打开小红书APP粘贴"},
+    {cls:"xhs", label:'📋 小红书·搜索', cpy: kw, cpyMsg:"✅ 已复制搜索词！打开小红书APP粘贴"}
   ];
 }
 function routeLinks(p){
   return [
-    {cls:"qq",   label:"腾讯路线", url:"https://apis.map.qq.com/uri/v1/routeplan?type=drive&to="+p.lat+","+p.lng+"&toName="+qs(p.name)+"&referer=travel"},
-    {cls:"amap", label:"高德地图", url:"https://uri.amap.com/marker?position="+p.lng+","+p.lat+"&name="+qs(p.name)+"&src=travel"},
-    {cls:"ctrip",label:"携程",     url:"https://www.ctrip.com/searchsite/all/?query="+qs(p.name)},
-    {cls:"meituan",label:"美团",   url:"https://www.meituan.com/"}
+    {cls:"qq",   label:'🧭 腾讯导航', url:"https://apis.map.qq.com/uri/v1/routeplan?type=drive&to="+p.lat+","+p.lng+"&toName="+qs(p.name)+"&referer=travel", isNav:true},
+    {cls:"amap", label:'🧭 高德导航', url:"https://uri.amap.com/marker?position="+p.lng+","+p.lat+"&name="+qs(p.name)+"&src=travel", isNav:true},
+    {cls:"ctrip",label:'📋 携程搜', cpy: p.name, cpyMsg:"✅ 已复制！打开携程APP或网站搜索"},
+    {cls:"meituan",label:'📋 美团搜', cpy: p.name+" "+ITINERARY[state.index].city, cpyMsg:"✅ 已复制！打开美团APP搜索"}
   ];
 }
 
-/* 深度链接：尝试唤起APP，失败则降级为网页打开 */
-function tryDeeplink(el, event){
-  const deepUrl = el.dataset.deep;
-  const webUrl = el.href;
-  if(!deepUrl || !deepUrl.startsWith('xhsdiscover://') && !deepUrl.startsWith('amapuri://') && !deepUrl.startsWith('baidumap://')){
-    return true; /* 非深度链接，正常跳转 */
-  }
-  /* 移动端：先尝试深度链接 */
-  if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+/* 链接点击处理：复制类→复制+提示；导航类→直接跳转 */
+function handleLinkClick(el, event){
+  const isCpy = el.dataset.cpy;
+  const isNav = el.dataset.nav;
+  if(isCpy){
     event.preventDefault();
-    const start = Date.now();
-    /* 尝试打开APP深度链接 */
-    window.location.href = deepUrl;
-    /* 如果800ms内没有离开页面（说明APP没装或打不开），降级到网页 */
-    setTimeout(() => {
-      if(Date.now() - start < 900){
-        window.open(webUrl, '_blank');
-      }
-    }, 800);
+    copyToClipboard(isCpy, el.dataset.cpyMsg || "✅ 已复制！");
     return false;
   }
-  /* 电脑端：直接用网页版（深度链接在PC浏览器无效） */
+  if(isNav){
+    /* 导航链接：移动端用 location.href 避免 window.open 被拦截 */
+    if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+      event.preventDefault();
+      window.location.href = el.href;
+      return false;
+    }
+    return true; /* PC端正常跳转 */
+  }
   return true;
 }
 
@@ -669,8 +737,7 @@ function locateMe(){
       state.userLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       btn.classList.remove("locating");
       btn.innerHTML = '<span class="loc-dot"></span> 已定位 ✓';
-      btn.style.background = 'rgba(16,185,129,.12)';
-      btn.style.color = '#059669';
+      btn.classList.add("success");
       /* 在腾讯地图上显示用户位置（醒目标记 + 信息窗 + 脉冲动画） */
       if(useTencent && tencentMap && state.userLoc){
         showUserMarker(state.userLoc.lat, state.userLoc.lng);
@@ -689,34 +756,33 @@ function locateMe(){
   );
 }
 
-/* 在地图上显示/刷新用户定位标记（切换Day时也需重新添加） */
+/* 在地图上显示/刷新用户定位标记（用DOM覆盖层，比TMap MultiLabel更可靠） */
 function showUserMarker(lat, lng){
   if(!(useTencent && tencentMap)) return;
   /* 清除旧标记 */
   if(tencentUserMarker) { try{tencentUserMarker.setMap(null);}catch(e){} tencentUserMarker = null; }
+  if(tencentUserLabel) { try{tencentUserLabel.setMap(null);}catch(e){} tencentUserLabel = null; }
 
   const pos = new TMap.LatLng(lat, lng);
-  /* 醒目的用户定位图标：绿色圆点 + 白色内圈 + 蓝色脉冲外环 */
+
+  /* 用 TMap Marker 显示绿色定位点（带脉冲动画SVG） */
   const svgIcon = encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">'+
-      '<defs>'+
-        '<filter id="userGlow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+
-        '<style>@keyframes pulse{0%{r:8;opacity:.8}100%{r:18;opacity:0}}</style>'+
-      '</defs>'+
-      '<circle cx="20" cy="20" r="18" fill="#10b981" opacity=".25">'+
-        '<animate attributeName="r" values="10;20;10" dur="2s" repeatCount="indefinite"/>'+
-        '<animate attributeName="opacity" values=".5;.1;.5" dur="2s" repeatCount="indefinite"/>'+
+    '<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44">'+
+      '<defs><filter id="ug"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+
+      '<circle cx="22" cy="22" r="20" fill="#10b981" opacity=".2">'+
+        '<animate attributeName="r" values="12;22;12" dur="2s" repeatCount="indefinite"/>'+
+        '<animate attributeName="opacity" values=".4;.1;.4" dur="2s" repeatCount="indefinite"/>'+
       '</circle>'+
-      '<circle cx="20" cy="20" r="9" fill="#10b981" filter="url(#userGlow)"/>'+
-      '<circle cx="20" cy="20" r="4" fill="#fff"/>'+
+      '<circle cx="22" cy="22" r="11" fill="#10b981" filter="url(#ug)"/>'+
+      '<circle cx="22" cy="22" r="5" fill="#fff"/>'+
     '</svg>'
   );
 
   tencentUserMarker = new TMap.MultiMarker({
     map: tencentMap,
-    zIndex: 999, /* 确保在最上层 */
+    zIndex: 999,
     styles: {
-      "user-pin": { width:40, height:40, anchor:{x:20,y:20}, src:'data:image/svg+xml;charset=utf-8,'+svgIcon }
+      "user-pin": { width:44, height:44, anchor:{x:22,y:22}, src:'data:image/svg+xml;charset=utf-8,'+svgIcon }
     },
     geometries:[{
       id:"user-loc-marker",
@@ -725,32 +791,35 @@ function showUserMarker(lat, lng){
     }]
   });
 
-  /* 显示"我的位置"文字标签 */
-  const userLabel = new TMap.MultiLabel({
-    map:tencentMap,
-    zIndex: 998,
-    geometries:[{
-      id:"user-label",
-      position:pos,
-      content:"<div style='background:#10b981;color:#fff;font-size:11px;font-weight:bold;padding:3px 8px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);border:2px solid #fff'>📍 我的位置</div>",
-      styleId:"user-lbl"
-    }],
-    styles:{ "user-lbl":{anchor:{x:20,y:-18},direction:"center"} }
-  });
-  /* 保存标签引用以便清理 */
-  tencentUserLabel = userLabel;
+  /* 用 DOMOverlay 显示"我的位置"文字标签（比MultiLabel更可靠） */
+  try {
+    if(tencentUserLabel) { tencentUserLabel.destroy(); tencentUserLabel = null; }
+    const labelHtml = "<div class='user-marker-overlay'><div class='user-pin'></div><div class='user-label'>📍 我的位置</div></div>";
+    class UserLabelOverlay extends TMap.DOMOverlay {
+      onInit(){ this.dom.innerHTML = labelHtml; }
+    }
+    tencentUserLabel = new UserLabelOverlay({ position:pos, map:tencentMap });
+  } catch(e){
+    /* DOMOverlay 不可用时静默失败，标记本身已经显示了 */
+    console.warn("用户标签渲染降级:", e.message);
+  }
 }
 
 /* ===================== 外部 APP 跳转链接更新 ===================== */
 function updateExtAppLinks(centerPoi){
   if(!centerPoi) centerPoi = ITINERARY[state.index].pois[0];
-  // 腾讯地图APP Scheme
-  document.getElementById('qqAppBtn').href =
-    'https://apis.map.qq.com/uri/v1/routeplan?type=drive&to='+centerPoi.lat+','+centerPoi.lng+
-    '&toName='+qs(centerPoi.name)+'&referer=travel';
-  // 高德地图APP Scheme
-  document.getElementById('amapAppBtn').href =
-    'https://uri.amap.com/marker?position='+centerPoi.lng+','+centerPoi.lat+'&name='+qs(centerPoi.name)+'&src=travel';
+  const qqBtn = document.getElementById('qqAppBtn');
+  const amapBtn = document.getElementById('amapAppBtn');
+  if(qqBtn){
+    qqBtn.href = 'https://apis.map.qq.com/uri/v1/routeplan?type=drive&to='+centerPoi.lat+','+centerPoi.lng+'&toName='+qs(centerPoi.name)+'&referer=travel';
+    qqBtn.dataset.nav = "1";
+    qqBtn.onclick = function(e){ return handleLinkClick(this, e); };
+  }
+  if(amapBtn){
+    amapBtn.href = 'https://uri.amap.com/marker?position='+centerPoi.lng+','+centerPoi.lat+'&name='+qs(centerPoi.name)+'&src=travel';
+    amapBtn.dataset.nav = "1";
+    amapBtn.onclick = function(e){ return handleLinkClick(this, e); };
+  }
 }
 
 /* ===================== 渲染：徽章 ===================== */
@@ -807,8 +876,11 @@ function renderTimeline(dayObj){
         <h4>💡 旅行TIPS（小红书/美团/携程/高德经验）</h4>
         <ul>${tipsArr.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
         <div class="links">
-          ${xhsLinks(p.name).map(l => `<a class="lnk ${l.cls}" href="${l.webFallback || l.url}" data-deep="${l.url}" onclick="return tryDeeplink(this,event)" target="_blank" rel="noopener">${l.label}</a>`).join("")}
-          ${routeLinks(p).map(l => `<a class="lnk ${l.cls}" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("")}
+          ${xhsLinks(p.name).map(l => `<a class="lnk ${l.cls} cpy" href="javascript:void(0)" data-cpy="${esc(l.cpy)}" data-cpyMsg="${esc(l.cpyMsg)}" onclick="return handleLinkClick(this,event)">${l.label}</a>`).join("")}
+          ${routeLinks(p).map(l => l.isNav
+            ? `<a class="lnk ${l.cls}" href="${l.url}" data-nav="1" target="_blank" rel="noopener" onclick="return handleLinkClick(this,event)">${l.label}</a>`
+            : `<a class="lnk ${l.cls} cpy" href="javascript:void(0)" data-cpy="${esc(l.cpy)}" data-cpyMsg="${esc(l.cpyMsg)}" onclick="return handleLinkClick(this,event)">${l.label}</a>`
+          ).join("")}
         </div>
       </div>`;
     return `
@@ -843,7 +915,7 @@ function renderTimeline(dayObj){
             </div>
             <div class="h-right">
               <span class="h-price">${esc(h.price)}</span>
-              <a class="h-btn" href="${h.ctripLink}" target="_blank" rel="noopener">携程查价</a>
+              <a class="h-btn cpy" href="javascript:void(0)" data-cpy="${esc(h.name)}" data-cpyMsg="✅ 已复制酒店名！打开携程搜索" onclick="return handleLinkClick(this,event)">携程查价</a>
             </div>
           </div>`).join("")}
       </div>`;
@@ -865,7 +937,7 @@ function renderTimeline(dayObj){
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
               <span class="bh-price">${esc(b.price)}</span>
-              <a class="bh-link" href="${b.ctripLink}" target="_blank" rel="noopener">查看详情 ›</a>
+              <a class="bh-link cpy" href="javascript:void(0)" data-cpy="${esc(b.name)}" data-cpyMsg="✅ 已复制！打开携程搜索" onclick="return handleLinkClick(this,event)">查看详情 ›</a>
             </div>
           </div>`).join("")}
       </div>`;
