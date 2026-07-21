@@ -1013,30 +1013,40 @@ function renderTencent(dayObj, pois){
   });
   const path = pois.map(p => new TMap.LatLng(p.lat, p.lng));
 
+  /* 每个标记的SVG图标直接嵌入数字编号（不使用MultiLabel，避免CSS泄露问题） */
   const styles = {};
   Object.values(CAT_COLORS).forEach(c => {
+    /* 基础样式：带数字的圆形标记 */
+    const baseSvg = (num) => encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34">'+
+      '<circle cx="17" cy="17" r="15" fill="'+c+'" stroke="#fff" stroke-width="2"/>'+
+      '<text x="17" y="18" font-size="13" font-weight="bold" fill="#fff" text-anchor="middle" dominant-baseline="central">'+num+'</text>'+
+      '</svg>'
+    );
+    /* 为每个可能的数字预生成样式（1-20足够覆盖单日POI数量） */
+    for(let n=1; n<=20; n++){
+      styles["mark-"+c+"-"+n] = {
+        width:34, height:34, anchor:{x:17,y:17},
+        src:'data:image/svg+xml;charset=utf-8,'+baseSvg(n)
+      };
+    }
+    /* 默认样式（无数字，用于搜索标记等） */
     styles["mark-"+c] = {
       width:34, height:34, anchor:{x:17,y:17},
       src:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34"><circle cx="17" cy="17" r="15" fill="'+c+'"/></svg>'
+        '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34"><circle cx="17" cy="17" r="15" fill="'+c+'" stroke="#fff" stroke-width="2"/></svg>'
       )
     };
   });
 
   tencentMarkerLayer = new TMap.MultiMarker({
-    map: tencentMap, styles: styles, geometries: geometries
+    map: tencentMap, styles: styles, geometries: geometries.map((g,i) => ({
+      ...g,
+      styleId: g.styleId + "-" + (i+1)  /* 使用带数字编号的样式 */
+    }))
   });
 
-  tencentLabelLayer && tencentLabelLayer.setMap(null);
-  tencentLabelLayer = new TMap.MultiLabel({
-    map:tencentMap,
-    geometries: pois.map((p,i) => ({
-      id:"lbl-"+i, position:new TMap.LatLng(p.lat,p.lng),
-      content:"<div style='background:none;color:#fff;font-size:13px;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.5)'>"+(i+1)+"</div>",
-      styleId:"label"
-    })),
-    styles:{ label:{anchor:{x:17,y:17}} }
-  });
+  /* 不再使用 MultiLabel（已移除，修复CSS代码泄露问题） */
 
   tencentPolylineLayer = new TMap.MultiPolyline({
     map: tencentMap,
@@ -1126,10 +1136,7 @@ function onSearch(q){
     const geoms = tencentMarkerLayer.getGeometries();
     const showIds = geoms.filter(g => !q || (g.properties.title||"").toLowerCase().includes(q)).map(g => g.id);
     tencentMarkerLayer.setGeometries(geoms.map(g => ({...g, visible: showIds.includes(g.id)})));
-    if(tencentLabelLayer){
-      const lbls = tencentLabelLayer.getGeometries();
-      tencentLabelLayer.setGeometries(lbls.map(l => ({...l, visible: showIds.includes(l.id.replace("lbl","marker-"))})));
-    }
+    /* 标签已内嵌到标记图标中，无需单独控制 */
   } else {
     document.querySelectorAll("#map .marker").forEach(m => {
       const name = (m.dataset.name || "").toLowerCase();
