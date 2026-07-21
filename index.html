@@ -324,11 +324,26 @@
     padding:3px 10px;border-radius:10px;margin-top:4px;
     white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);
     border:2px solid #fff;
+    }
+  /* 备用访问地址横幅 */
+  .backup-bar{
+    background:linear-gradient(90deg,#fef3c7,#fde68a);border-bottom:1px solid #f59e0b;
+    padding:8px 14px;text-align:center;font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
   }
+  .backup-bar a{color:#b45309;font-weight:700;text-decoration:none;padding:3px 10px;border-radius:6px;background:#fff;white-space:nowrap}
+  .backup-bar a:hover{background:#fef3c7}
+  .backup-bar .close-backup{cursor:pointer;color:#92400e;font-weight:bold;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.6)}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <!-- 备用访问地址（GitHub Pages 部分地区/运营商可能访问慢） -->
+  <div class="backup-bar" id="backupBar">
+    <span>⚡ 如果页面加载慢或打不开，试试备用地址：</span>
+    <a href="https://e78e330e7abb4da882614243280ff418.app.codebuddy.work/dalian-itinerary.html" target="_blank" rel="noopener">🌐 备用链接1（CloudStudio）</a>
+    <span class="close-backup" onclick="document.getElementById('backupBar').style.display='none'">✕ 关闭</span>
+  </div>
 
   <!-- Banner -->
   <header class="banner">
@@ -674,43 +689,38 @@ function fallbackCopy(text, successMsg){
   document.body.removeChild(ta);
 }
 
-/* 平台链接 - 全部改为「一键复制搜索词」+ 直接网页链接 */
+/* 平台链接：区分可直接跳转 vs 需要复制的 */
+/* 规则：
+   - 携程/美团/高德/腾讯地图 → 普通HTTPS链接，直接可点击（不会被拦截）
+   - 小红书 → APP深度链接在浏览器无效，保持复制方案
+*/
 function xhsLinks(name){
   const kw = name;
   return [
-    {cls:"xhs", label:'📋 小红书·攻略', cpy: name+" 攻略", cpyMsg:"✅ 已复制攻略关键词！打开小红书APP粘贴"},
-    {cls:"xhs", label:'📋 小红书·出片', cpy: name+" 出片", cpyMsg:"✅ 已复制出片关键词！打开小红书APP粘贴"},
-    {cls:"xhs", label:'📋 小红书·搜索', cpy: kw, cpyMsg:"✅ 已复制搜索词！打开小红书APP粘贴"}
+    {cls:"xhs", label:'📋 小红书·攻略', cpy: name+" 攻略", cpyMsg:"✅ 已复制「"+name+" 攻略」！打开小红书APP粘贴搜索"},
+    {cls:"xhs", label:'📋 小红书·出片', cpy: name+" 出片", cpyMsg:"✅ 已复制「"+name+" 出片」！打开小红书APP粘贴搜索"},
+    {cls:"xhs", label:'📋 小红书·搜索', cpy: kw, cpyMsg:"✅ 已复制！打开小红书APP粘贴搜索"}
   ];
 }
 function routeLinks(p){
+  const city = ITINERARY[state.index].city || "";
   return [
-    {cls:"qq",   label:'🧭 腾讯导航', url:"https://apis.map.qq.com/uri/v1/routeplan?type=drive&to="+p.lat+","+p.lng+"&toName="+qs(p.name)+"&referer=travel", isNav:true},
-    {cls:"amap", label:'🧭 高德导航', url:"https://uri.amap.com/marker?position="+p.lng+","+p.lat+"&name="+qs(p.name)+"&src=travel", isNav:true},
-    {cls:"ctrip",label:'📋 携程搜', cpy: p.name, cpyMsg:"✅ 已复制！打开携程APP或网站搜索"},
-    {cls:"meituan",label:'📋 美团搜', cpy: p.name+" "+ITINERARY[state.index].city, cpyMsg:"✅ 已复制！打开美团APP搜索"}
+    {cls:"qq",   label:'🧭 腾讯导航', url:"https://apis.map.qq.com/uri/v1/routeplan?type=drive&to="+p.lat+","+p.lng+"&toName="+qs(p.name)+"&referer=travel"},
+    {cls:"amap", label:'🧭 高德导航', url:"https://uri.amap.com/marker?position="+p.lng+","+p.lat+"&name="+qs(p.name)+"&src=travel"},
+    {cls:"ctrip",label:'🔍 携程搜', url:"https://www.ctrip.com/hotel/search?keyword="+qs(p.name+" "+city+"&checkin=2026-08-04&checkout=2026-08-05")},
+    {cls:"meituan",label:'🔍 美团搜', url:"https://www.meituan.com/s/"+qs(p.name+" "+city)+"/"}
   ];
 }
 
-/* 链接点击处理：复制类→复制+提示；导航类→直接跳转 */
+/* 链接点击处理：复制类→复制+提示；普通链接→直接跳转 */
 function handleLinkClick(el, event){
   const isCpy = el.dataset.cpy;
-  const isNav = el.dataset.nav;
   if(isCpy){
     event.preventDefault();
     copyToClipboard(isCpy, el.dataset.cpyMsg || "✅ 已复制！");
     return false;
   }
-  if(isNav){
-    /* 导航链接：移动端用 location.href 避免 window.open 被拦截 */
-    if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
-      event.preventDefault();
-      window.location.href = el.href;
-      return false;
-    }
-    return true; /* PC端正常跳转 */
-  }
-  return true;
+  return true; /* 普通链接正常跳转 */
 }
 
 /* 经纬度 → SVG 坐标（保持纵横比，内容居中并加 padding） */
@@ -726,19 +736,22 @@ function computeProjection(bounds){
   };
 }
 
-/* ===================== GPS 定位 ===================== */
+/* ===================== GPS 定位（增强版：自动定位 + 手动输入备选） ===================== */
 function locateMe(){
   const btn = document.getElementById("locBtn");
-  if(!navigator.geolocation){ alert("您的浏览器不支持定位功能"); return; }
+  if(!navigator.geolocation){
+    showManualLocationInput(); return;
+  }
   btn.classList.add("locating");
   btn.innerHTML = '<span class="loc-dot"></span> 正在定位…';
   navigator.geolocation.getCurrentPosition(
     pos => {
       state.userLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
       btn.classList.remove("locating");
-      btn.innerHTML = '<span class="loc-dot"></span> 已定位 ✓';
       btn.classList.add("success");
-      /* 在腾讯地图上显示用户位置（醒目标记 + 信息窗 + 脉冲动画） */
+      btn.innerHTML = '<span class="loc-dot" style="background:#10b981"></span> 已定位 ✓';
+      btn.style.background = 'rgba(16,185,129,.12)';
+      btn.style.color = '#059669';
       if(useTencent && tencentMap && state.userLoc){
         showUserMarker(state.userLoc.lat, state.userLoc.lng);
         tencentMap.panTo(new TMap.LatLng(state.userLoc.lat, state.userLoc.lng));
@@ -748,12 +761,53 @@ function locateMe(){
     },
     err => {
       btn.classList.remove("locating");
-      btn.innerHTML = '<span class="loc-dot"></span> 定位失败（点击重试）';
-      console.warn('定位失败:', err.message);
-      alert("定位失败："+err.message+"\n\n请在浏览器设置中允许位置权限，或在手机端使用");
+      let msg = "定位失败";
+      if(err.code === 1) msg = "被拒绝（请允许位置权限）";
+      else if(err.code === 2) msg = "无法获取（信号弱？）";
+      else if(err.code === 3) msg = "定位超时";
+      btn.innerHTML = '<span class="loc-dot" style="background:#f97316"></span> '+msg+'（点击重试）';
+      btn.style.background = 'rgba(249,115,22,.1)';
+      btn.style.color = '#c2410c';
+      showManualLocationInput();
+      console.warn('定位失败:', err.message, 'code:', err.code);
     },
-    { enableHighAccuracy:true, timeout:10000, maximumAge:60000 }
+    { enableHighAccuracy:true, timeout:12000, maximumAge:60000 }
   );
+}
+
+/* 手动输入城市名作为定位备选 */
+function showManualLocationInput(){
+  let panel = document.getElementById("manualLocPanel");
+  if(!panel){
+    panel = document.createElement("div");
+    panel.id = "manualLocPanel";
+    panel.innerHTML = '<div style="display:flex;gap:6px;margin-top:6px;align-items:center"><input id="manualCity" placeholder="输入城市名（如：大连）…" style="flex:1;min-width:0;border:1px solid rgba(43,108,176,.25);border-radius:8px;padding:7px 10px;font-size:13px;background:#fff;outline:none"><button onclick="locateByCity()" style="padding:7px 14px;border-radius:8px;border:none;background:#3b82f6;color:#fff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">📍 定位到该城市</button></div><div style="font-size:11px;color:#64748b;margin-top:4px">💡 或直接点击下方Day Tab，地图会自动跳转到对应城市</div>';
+    const btn = document.getElementById("locBtn");
+    if(btn && btn.parentNode) btn.parentNode.insertBefore(panel, btn.nextSibling);
+  }
+  panel.style.display = "";
+}
+
+function locateByCity(){
+  const cityInput = document.getElementById("manualCity");
+  const city = cityInput ? cityInput.value.trim() : "";
+  if(!city){ showToast("❌ 请输入城市名"); return; }
+  const cc = {"大连":{lat:38.914,lng:121.615},"威海":{lat:37.510,lng:122.070},"烟台":{lat:37.548,lng:121.405},"青岛":{lat:36.062,lng:120.385},"dalian":{lat:38.914,lng:121.615},"weihai":{lat:37.510,lng:122.070},"yantai":{lat:37.548,lng:121.405},"qingdao":{lat:36.062,lng:120.385}};
+  const center = cc[city] || cc[city.toLowerCase()];
+  if(center && useTencent && tencentMap){
+    state.userLoc = center;
+    showUserMarker(center.lat, center.lng);
+    tencentMap.panTo(new TMap.LatLng(center.lat, center.lng));
+    tencentMap.setZoom(12);
+    showToast("✅ 已定位到 "+city);
+    const btn = document.getElementById("locBtn");
+    if(btn){ btn.classList.add("success"); btn.innerHTML = '<span class="loc-dot" style="background:#10b981"></span> '+city+' ✓'; btn.style.background = 'rgba(16,185,129,.12)'; btn.style.color = '#059669'; }
+  } else if(center) {
+    state.userLoc = center;
+    showToast("✅ 已设置位置为 "+city+"（地图加载后显示）");
+  } else {
+    showToast("⚠️ 未找到「"+city+"」，试试：大连/威海/烟台/青岛");
+  }
 }
 
 /* 在地图上显示/刷新用户定位标记（用DOM覆盖层，比TMap MultiLabel更可靠） */
@@ -877,9 +931,9 @@ function renderTimeline(dayObj){
         <ul>${tipsArr.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
         <div class="links">
           ${xhsLinks(p.name).map(l => `<a class="lnk ${l.cls} cpy" href="javascript:void(0)" data-cpy="${esc(l.cpy)}" data-cpyMsg="${esc(l.cpyMsg)}" onclick="return handleLinkClick(this,event)">${l.label}</a>`).join("")}
-          ${routeLinks(p).map(l => l.isNav
-            ? `<a class="lnk ${l.cls}" href="${l.url}" data-nav="1" target="_blank" rel="noopener" onclick="return handleLinkClick(this,event)">${l.label}</a>`
-            : `<a class="lnk ${l.cls} cpy" href="javascript:void(0)" data-cpy="${esc(l.cpy)}" data-cpyMsg="${esc(l.cpyMsg)}" onclick="return handleLinkClick(this,event)">${l.label}</a>`
+          ${routeLinks(p).map(l => l.cpy
+            ? `<a class="lnk ${l.cls} cpy" href="javascript:void(0)" data-cpy="${esc(l.cpy)}" data-cpyMsg="${esc(l.cpyMsg)}" onclick="return handleLinkClick(this,event)">${l.label}</a>`
+            : `<a class="lnk ${l.cls}" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`
           ).join("")}
         </div>
       </div>`;
@@ -915,7 +969,7 @@ function renderTimeline(dayObj){
             </div>
             <div class="h-right">
               <span class="h-price">${esc(h.price)}</span>
-              <a class="h-btn cpy" href="javascript:void(0)" data-cpy="${esc(h.name)}" data-cpyMsg="✅ 已复制酒店名！打开携程搜索" onclick="return handleLinkClick(this,event)">携程查价</a>
+              <a class="h-btn" href="${h.ctripLink || ('https://www.ctrip.com/hotel/search?keyword='+qs(h.name))}" target="_blank" rel="noopener">携程查价</a>
             </div>
           </div>`).join("")}
       </div>`;
@@ -937,7 +991,7 @@ function renderTimeline(dayObj){
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
               <span class="bh-price">${esc(b.price)}</span>
-              <a class="bh-link cpy" href="javascript:void(0)" data-cpy="${esc(b.name)}" data-cpyMsg="✅ 已复制！打开携程搜索" onclick="return handleLinkClick(this,event)">查看详情 ›</a>
+              <a class="bh-link" href="${b.ctripLink || ('https://www.ctrip.com/sight/dalian4/?keyword='+qs(b.name))}" target="_blank" rel="noopener">查看详情 ›</a>
             </div>
           </div>`).join("")}
       </div>`;
